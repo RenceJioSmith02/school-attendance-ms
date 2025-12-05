@@ -1,11 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
-    Hello world!
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOLNHS | Login</title>
+    <link rel="icon" href="assets/images/system_image/school-logo.png" type="image/png">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <script type="text/javascript" src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/sweetalert2.min.js"></script>
+</head>
+<body>
+    
+  <div class="login-container flex jus-center al-center">
+    
+    <div class="left flex al-center jus-center">
+        <!-- Add form -->
+        <div class="form-container" id="loginform-container">
+            <br>
+            <div class="header flex jus-center al-center flex-col">
+                <h2>Welcome!</h2>
+                <p>Please login to your account.</p>
+            </div>
+            <br>
+
+            <form method="POST" id="loginForm" enctype="multipart/form-data">
+
+                <div class="form-input-container flex jus-center al-center">
+
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" name="email" placeholder="juan@gmail.com">
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" name="password" placeholder="Enter your password">
+                    </div>
+
+                </div>
+
+                <div class="form-buttons flex jus-center al-center flex-col gap10 mt20">
+                    <input class="btn-primary" style="width: 100%; font-weight:500; font-size: 15px;" type="submit" name="add_member" value="LOGIN" style="max-width: 80px;">
+                    <p>don't have an account? <a href="signup.html">Sign up</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="right flex al-center jus-center">
+      <img src="./assets/images/system_image/school-logo.png" id="logo" width="250" alt="Logo" style="filter: drop-shadow(5px 5px 10px rgba(0,0,0,0.5));">
+    </div>
+
+  </div>
+
+
+<script>
+  const logo = document.getElementById("logo");
+
+  document.addEventListener("mousemove", (e) => {
+    const intensity = 45;
+
+    const x = (window.innerWidth / 2 - e.clientX) / intensity;
+    const y = (window.innerHeight / 2 - e.clientY) / intensity;
+
+    // Strong tilt
+    logo.style.transform = `rotateY(${-x * 2}deg) rotateX(${y * 2}deg) scale(1.05)`;
+
+    // Shadow follows opposite of cursor movement
+    const shadowX = x * 3;   // multiplier = shadow intensity
+    const shadowY = y * 3;
+    const blur = 20;
+
+    logo.style.filter = `drop-shadow(${shadowX}px ${shadowY}px ${blur}px rgba(0,0,0,0.55))`;
+  });
+
+  document.addEventListener("mouseleave", () => {
+    logo.style.transform = "rotateY(0deg) rotateX(0deg) scale(1)";
+    logo.style.filter = "drop-shadow(5px 5px 15px rgba(0,0,0,0.55))";
+  });
+</script>
+
+
+
+</body>
 </html>
+
+
