@@ -101,6 +101,46 @@ try {
                 $response = ["status" => "success", "message" => "Password reset successfully."];
                 break;
 
+            
+            /* ---------------- GET TEACHERS FOR DATATABLE ---------------- */
+            case "getTeachers":
+
+                // OPTIONAL: search
+                $search = $_POST['search'] ?? '';
+
+                $sql = "
+                    SELECT 
+                        users.id AS user_id,
+                        users.name,
+                        users.profile_photo,
+                        teachers.department,
+                        users.age,
+                        users.gender,
+                        users.birthdate,
+                        users.address,
+                        users.email,
+                        users.password
+                    FROM users
+                    INNER JOIN teachers ON teachers.teacher_id = users.id
+                    WHERE users.name LIKE ?
+                    ORDER BY users.id DESC
+                ";
+
+                $params = ["%$search%"];
+                $data = $mydb->rawQuery($sql, $params);
+
+                $response = [
+                    "status" => "success",
+                    "data" => $data
+                ];
+                
+                break;
+
+
+
+
+
+
             default:
                 $response = ["status" => "error", "message" => "Unknown action"];
         }

@@ -204,12 +204,14 @@ a {
   height: 100vh;
   background-color: var(--color-bg);
   color: var(--white-pure);
+  overflow: hidden;
 }
 
 .container .content {
-    padding: 0px 50px;
+    padding: 0px 50px 50px 50px;
     width: 100%;
     gap: 20px;
+    overflow: auto;
 }
 
 
@@ -427,7 +429,182 @@ a.btn-secondary:hover {
 /* =========================
    Tables
 ========================= */
+/* =========================
+   Global DataTable Styles
+========================= */
 
+/* TABLE WRAPPER (White card background + shadow) */
+.table-container {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 0px 0px 20px 0px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow-x: auto; /* Make table scrollable horizontally */
+}
+
+/* BASE TABLE */
+table.dataTable {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0;
+    font-family: 'Arial', sans-serif;
+    color: #000;
+    table-layout: auto;
+}
+
+/* HEADER (Yellow + Rounded Top) */
+table.dataTable thead th {
+    background: #E4E44C; 
+    padding: 14px 10px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 14px;
+    color: #000;
+    border-bottom: none;
+}
+
+table.dataTable thead th:first-child {
+    border-top-left-radius: 10px;
+}
+table.dataTable thead th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* TABLE BODY ROWS */
+table.dataTable tbody tr {
+    background: #ffffff;
+    border-bottom: 1px solid #ddd;
+}
+
+table.dataTable tbody td {
+    padding: 14px 10px;
+    font-size: 14px;
+    color: #000;
+    vertical-align: middle;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+/* Row Hover */
+table.dataTable tbody tr:hover {
+    background: #F3F5FD;
+}
+
+/* ACTION BUTTONS (Edit / Delete) */
+.edit-user,
+.delete-user {
+    display: inline-block;
+    white-space: nowrap;
+    margin-right: 5px;
+    padding: 5px 15px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+}
+
+.edit-user {
+    background: #20449C;
+    color: #fff;
+}
+
+.edit-user:hover {
+    background: #1A3A88;
+}
+
+.delete-user {
+    background: transparent;
+    color: #CC0000;
+    border: 1px solid #CC0000;
+}
+
+.delete-user:hover {
+    background: #ffe5e5;
+}
+
+/* PROFILE IMAGE STYLE */
+table.dataTable img {
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+}
+
+/* PAGINATION (Modern + Clean) */
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 6px;
+    padding: .755em 20px 0px 20px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 5px 12px !important;
+    border-radius: 6px !important;
+    background: #edf1ff !important;
+    border: none !important;
+    margin: 0 3px;
+    color: #15285C !important;
+    cursor: pointer;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: #15285C !important;
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #1B336F !important;
+    color: #fff !important;
+}
+
+/* LENGTH DROPDOWN */
+.dataTables_wrapper .dataTables_length select {
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #000;
+}
+
+
+/* "No data" / Loading message */
+.dataTables_empty {
+    padding: 20px !important;
+    text-align: center !important;
+    font-size: 16px;
+    color: #555;
+}
+
+/* RESPONSIVE SCROLLING */
+@media screen and (max-width: 1024px) {
+    .table-container {
+        overflow-x: auto;
+    }
+    table.dataTable tbody td {
+        white-space: nowrap; /* Keep content in one line */
+    }
+    .edit-user, .delete-user {
+        white-space: nowrap; /* Buttons never wrap */
+    }
+}
+
+
+
+/* datatables customize */
+
+.dataTables_filter {
+    display: none !important;
+}
+
+.dataTables_length {
+    display: none !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    color: var(--gray-text);          
+    font-size: 14px;        
+    margin-top: 6px;     
+    margin-left: 20px;  
+    font-weight: 500;       
+}
 
 
 /* =========================

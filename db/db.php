@@ -5,7 +5,7 @@ class myDB
     private $servername = "localhost";
     private $username = "root";
     private $password = "";
-    private $dbname = "dkb-fitness-gym";
+    private $dbname = "school_attendance_db";
     public $res;
     private $conn;
 
@@ -48,12 +48,6 @@ class myDB
         } catch (Exception $e) {
             die("Error while inserting data: " . $e->getMessage());
         }
-    }
-
-    // GET LAST INSERTED ID 
-    public function getLastId()
-    {
-        return $this->conn->insert_id;
     }
 
     // UPDATE DATA 

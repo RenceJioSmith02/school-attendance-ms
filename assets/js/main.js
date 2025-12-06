@@ -1,0 +1,59 @@
+// =============================
+// Burger Menu & Mobile Sidebar
+// =============================
+
+$(document).ready(function () {
+  const burger = $("#burgerMenu");
+  const sidebar = $("#mobileSidebar");
+
+  // Toggle sidebar
+  burger.on("click", function () {
+    sidebar.toggleClass("open");
+    burger.toggleClass("active");
+
+    // disable body scroll when sidebar is open
+    if (sidebar.hasClass("open")) {
+      $("body").css("overflow", "hidden");
+    } else {
+      $("body").css("overflow", "auto");
+    }
+  });
+
+  // Close sidebar when clicking outside (on mobile)
+  $(document).on("click", function (e) {
+    if (
+      !sidebar.is(e.target) &&
+      sidebar.has(e.target).length === 0 &&
+      !burger.is(e.target) &&
+      burger.has(e.target).length === 0
+    ) {
+      if (sidebar.hasClass("open")) {
+        sidebar.removeClass("open");
+        burger.removeClass("active");
+        $("body").css("overflow", "auto");
+      }
+    }
+  });
+});
+
+// =============================
+// Modals
+// =============================
+function showModal(id) {
+  $("#overlay").show();
+  $(`#${id}`).show();
+}
+
+function hideModals() {
+  $("#overlay").hide();
+  $(".modal").hide();
+  imagePreview.src = DEFAULT_IMAGE; // reset to default
+  imageInput.value = ""; // clear file input
+}
+
+$("#showAddClassForm").on("click", function (e) {
+  e.preventDefault();
+  showModal("add-class");
+});
+
+$("#overlay").on("click", hideModals);
