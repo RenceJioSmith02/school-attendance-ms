@@ -37,8 +37,12 @@ class myDB
 
             foreach ($data as $value) {
                 $prep .= '?,';
-                $types .= substr(gettype($value), 0, 1);
+                $type = substr(gettype($value), 0, 1);
+                if ($type === "N")
+                    $type = "s";
+                $types .= $type;
             }
+
 
             $prep = rtrim($prep, ',');
             $stmt = $this->conn->prepare("INSERT INTO $table ($table_columns) VALUES ($prep)");
@@ -48,6 +52,12 @@ class myDB
         } catch (Exception $e) {
             die("Error while inserting data: " . $e->getMessage());
         }
+    }
+
+    // GET LAST INSERTED ID 
+    public function getLastId()
+    {
+        return $this->conn->insert_id;
     }
 
     // UPDATE DATA 

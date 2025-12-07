@@ -28,33 +28,34 @@ try {
 
             /* ---------------- LOGIN PROCESS ---------------- */
             case "login":
-                $username = $_POST['auth_username'] ?? '';
+
+                $email = $_POST['auth_username'] ?? '';
                 $password = $_POST['auth_password'] ?? '';
 
-                if (empty($username) || empty($password)) {
-                    $response = ["status" => "error", "message" => "Please enter both username and password"];
+                if (empty($email) || empty($password)) {
+                    $response = ["status" => "error", "message" => "Please enter both email and password"];
                     break;
                 }
 
-                // Fetch user auth info
-                $userAuth = $mydb->select("users_auth", "*", ["auth_username" => $username]);
+                // fetch from users table
+                $user = $mydb->select("users", "*", ["email" => $email]);
 
-                if (!$userAuth) {
-                    $response = ["status" => "error", "message" => "Invalid username or password"];
+                if (!$user) {
+                    $response = ["status" => "error", "message" => "Invalid email or password"];
                     break;
                 }
 
-                $userAuth = $userAuth[0];
+                $user = $user[0];
 
-                // Verify password 
-                if (!password_verify($password, $userAuth['auth_password'])) {
-                    $response = ["status" => "error", "message" => "Invalid username or password"];
+                if (!password_verify($password, $user['password'])) {
+                    $response = ["status" => "error", "message" => "Invalid email or password"];
                     break;
                 }
 
-                $_SESSION['auth_id'] = $userAuth['auth_id'];
-                $_SESSION['username'] = $username;
-                $_SESSION['user_role'] = $userAuth['auth_role'];
+                // SUCCESS
+                $_SESSION['user_id'] = $user["id"];
+                $_SESSION['username'] = $user["email"];
+                $_SESSION['user_role'] = $user["role"];
 
                 $response = [
                     "status" => "success",
@@ -62,6 +63,7 @@ try {
                     "redirect" => "dashboard.php"
                 ];
                 break;
+
 
             case "logout":
                 $_SESSION = []; //clears all session data.
@@ -118,8 +120,7 @@ try {
                         users.gender,
                         users.birthdate,
                         users.address,
-                        users.email,
-                        users.password
+                        users.email
                     FROM users
                     INNER JOIN teachers ON teachers.teacher_id = users.id
                     WHERE users.name LIKE ?
@@ -135,7 +136,111 @@ try {
                 ];
                 
                 break;
+            
+            /* ---------------- GET STUDENTS FOR DATATABLE ---------------- */
+            case "getStudents":
 
+                $search = $_POST['search'] ?? '';
+
+                $sql = "
+                    SELECT 
+                        users.id AS user_id,
+                        users.name,
+                        users.profile_photo,
+                        students.lrn,
+                        users.age,
+                        users.gender,
+                        users.birthdate,
+                        users.address,
+                        users.email,
+                        students.guardian_email,
+                        students.guardian_contact
+                    FROM users
+                    INNER JOIN students ON students.student_id = users.id
+                    WHERE users.name LIKE ?
+                    ORDER BY users.id DESC
+                ";
+
+                $params = ["%$search%"];
+                $data = $mydb->rawQuery($sql, $params);
+
+                $response = [
+                    "status" => "success",
+                    "data" => $data
+                ];
+
+                break;
+
+
+            /* ---------------- ADD NEW TEACHER ---------------- */
+            case "addTeacher":
+
+                $fullname = $_POST['fullname'] ?? '';
+                $department = $_POST['departments'] ?? '';
+                $address = $_POST['address'] ?? '';
+                $birthdate = $_POST['birthdate'] ?? '';
+                $gender = $_POST['gender'] ?? '';
+                $email = $_POST['email'] ?? '';
+                $password = $_POST['password'] ?? '';
+                $isRegistered = $_POST['is_registered'] ?? 1;
+                $role = "teacher";
+
+                // Validate
+                if (empty($fullname) || empty($department) || empty($email) || empty($password)) {
+                    $response = ["status" => "error", "message" => "Please fill all required fields."];
+                    break;
+                }
+
+                // Check if email already exists in users table
+                $existing = $mydb->select("users", "*", ["email" => $email]);
+                if ($existing) {
+                    $response = ["status" => "error", "message" => "Email already exists!"];
+                    break;
+                }
+
+                // hash password for login
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+                // Auto age calculation
+                if (!empty($birthdate)) {
+                    $age = (new DateTime())->diff(new DateTime($birthdate))->y;
+                } else {
+                    $age = null;
+                }
+
+                // INSERT USER
+                $mydb->insert("users", [
+                    "name" => $fullname,
+                    "profile_photo" => "default.png",
+                    "age" => $age,
+                    "gender" => $gender,
+                    "birthdate" => $birthdate,
+                    "address" => $address,
+                    "email" => $email,
+                    "password" => $hashedPassword,
+                    "role" => $role,
+                    "is_registered" => $isRegistered
+                ]);
+
+                $userId = $mydb->getLastId();
+
+                if (!$userId) {
+                    $response = ["status" => "error", "message" => "Failed to create user record."];
+                    break;
+                }
+
+                // INSERT TEACHER RECORD
+                $mydb->insert("teachers", [
+                    "teacher_id" => $userId,
+                    "department" => $department
+                ]);
+
+                $response = [
+                    "status" => "success",
+                    "message" => "Teacher added successfully",
+                    "user_id" => $userId
+                ];
+                break;
 
 
 

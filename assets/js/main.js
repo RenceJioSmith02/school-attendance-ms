@@ -51,9 +51,15 @@ function hideModals() {
   imageInput.value = ""; // clear file input
 }
 
+// Show Modals
 $("#showAddClassForm").on("click", function (e) {
   e.preventDefault();
   showModal("add-class");
+});
+
+$("#showAddTeacherForm").on("click", function (e) {
+  e.preventDefault();
+  showModal("add-teacher");
 });
 
 $("#overlay").on("click", hideModals);
