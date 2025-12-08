@@ -426,191 +426,159 @@ a.btn-secondary:hover {
 }
 
 
+
 /* =========================
-   Tables
-========================= */
-/* =========================
-   Global DataTable Styles
+   Tables (Responsive & Scrollable)
 ========================= */
 
-/* TABLE WRAPPER (White card background + shadow) */
 .table-container {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 0px 0px 20px 0px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    overflow-x: auto; /* Make table scrollable horizontally */
+    background: var(--white-pure);
+    border-radius: var(--radius-md);
+    padding: 0 0 20px 0;
+    box-shadow: var(--shadow-md);
+    overflow-x: auto; /* horizontal scroll */
+    color: var(--gray-cool);
+    font-family: var(--font-base);
 }
 
-/* BASE TABLE */
-table.dataTable {
-    width: 100% !important;
-    border-collapse: separate !important;
-    border-spacing: 0;
-    font-family: 'Arial', sans-serif;
-    color: #000;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--gray-cool);
+    table-layout: auto; /* let columns size naturally */
+    font-size: var(--font-size-sm);
+    min-width: 800px; /* ensures scroll on small screens */
+}
+
+thead {
+    background-color: var(--primary-200);
+    color: var(--white-pure);
+    display: table;
+    width: 100%;
+    font-weight: var(--font-weight-medium);
+}
+
+tbody {
+    display: block;       /* allows vertical scroll independently */
+    width: 100%;
+    max-height: 60vh;     /* optional vertical scroll height */
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+tbody tr {
+    display: table;
+    width: 100%;
     table-layout: auto;
+    transition: background-color 0.2s;
 }
 
-/* HEADER (Yellow + Rounded Top) */
-table.dataTable thead th {
-    background: #E4E44C; 
-    padding: 14px 10px;
+tbody tr:hover {
+    background-color: var(--gray-light);
+}
+
+th, td {
+    padding: 10px 18px;
     text-align: left;
-    font-weight: 500;
-    font-size: 14px;
-    color: #000;
-    border-bottom: none;
+    border-bottom: 1px solid #d1d3db;
+    box-sizing: border-box;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-normal);
+    white-space: nowrap;   /* prevent breaking inside cells */
+    min-width: 120px;      /* minimum width per column */
+    word-break: break-all;
 }
 
-table.dataTable thead th:first-child {
-    border-top-left-radius: 10px;
-}
-table.dataTable thead th:last-child {
-    border-top-right-radius: 10px;
-}
-
-/* TABLE BODY ROWS */
-table.dataTable tbody tr {
-    background: #ffffff;
-    border-bottom: 1px solid #ddd;
+/* Last column fixed width for actions */
+table td:last-child,
+table th:last-child {
+    min-width: 180px;
+    max-width: 220px;
 }
 
-table.dataTable tbody td {
-    padding: 14px 10px;
-    font-size: 14px;
-    color: #000;
-    vertical-align: middle;
-    white-space: nowrap; /* Prevent text wrapping */
-}
-
-/* Row Hover */
-table.dataTable tbody tr:hover {
-    background: #F3F5FD;
-}
-
-/* ACTION BUTTONS (Edit / Delete) */
-.edit-user,
-.delete-user {
-    display: inline-block;
-    white-space: nowrap;
-    margin-right: 5px;
-    padding: 5px 15px;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
+/* Sort buttons */
+th button {
+    background: none;
     border: none;
-}
-
-.edit-user {
-    background: #20449C;
-    color: #fff;
-}
-
-.edit-user:hover {
-    background: #1A3A88;
-}
-
-.delete-user {
-    background: transparent;
-    color: #CC0000;
-    border: 1px solid #CC0000;
-}
-
-.delete-user:hover {
-    background: #ffe5e5;
-}
-
-/* PROFILE IMAGE STYLE */
-table.dataTable img {
-    border-radius: 50%;
-    width: 38px;
-    height: 38px;
-    object-fit: cover;
-}
-
-/* PAGINATION (Modern + Clean) */
-.dataTables_wrapper .dataTables_paginate {
-    margin-top: 6px;
-    padding: .755em 20px 0px 20px;
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    padding: 5px 12px !important;
-    border-radius: 6px !important;
-    background: #edf1ff !important;
-    border: none !important;
-    margin: 0 3px;
-    color: #15285C !important;
+    color: inherit;
+    font: inherit;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: #15285C !important;
-    color: #fff !important;
+th button img.sort-arrow {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.3s;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: #1B336F !important;
-    color: #fff !important;
-}
-
-/* LENGTH DROPDOWN */
-.dataTables_wrapper .dataTables_length select {
-    padding: 5px 10px;
-    border-radius: 8px;
-    border: 1px solid #cbd5e1;
-    background: #ffffff;
-    color: #000;
-}
-
-
-/* "No data" / Loading message */
-.dataTables_empty {
-    padding: 20px !important;
-    text-align: center !important;
-    font-size: 16px;
-    color: #555;
-}
-
-/* RESPONSIVE SCROLLING */
-@media screen and (max-width: 1024px) {
-    .table-container {
-        overflow-x: auto;
-    }
-    table.dataTable tbody td {
-        white-space: nowrap; /* Keep content in one line */
-    }
-    .edit-user, .delete-user {
-        white-space: nowrap; /* Buttons never wrap */
-    }
-}
-
-
-
-/* datatables customize */
-
-.dataTables_filter {
-    display: none !important;
-}
-
-.dataTables_length {
-    display: none !important;
-}
-
-.dataTables_wrapper .dataTables_info {
-    color: var(--gray-text);          
-    font-size: 14px;        
-    margin-top: 6px;     
-    margin-left: 20px;  
-    font-weight: 500;       
+th button.asc img.sort-arrow {
+    transform: rotate(180deg);
 }
 
 
 /* =========================
-   pagination
+   Pagination
 ========================= */
+.pagination-container {
+    margin-top: 10px;
+    text-align: center;
+    padding: 0 20px;
+}
 
+.pagination-container button {
+    color: var(--gray-cool);
+    background: var(--white-pure);
+    border: 1px solid var(--gray-light);
+    padding: 8px 16px;
+    margin: 0 5px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.pagination-container button:hover {
+    background: var(--gray-light);
+    transform: translateY(-1px);
+}
+
+.pagination-container button:disabled {
+    background: #f0f0f0;
+    color: #b0b0b0;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.pagination-container #pageInfo {
+    display: inline-block;
+    margin: 0 10px;
+    font-size: var(--font-size-sm);
+    color: var(--gray-cool);
+    font-weight: var(--font-weight-medium);
+}
+
+/* =========================
+   Responsive for Mobile
+========================= */
+@media (max-width: 768px) {
+    table {
+        min-width: 700px; /* allows horizontal scroll */
+    }
+
+    th, td {
+        padding: 8px 12px;
+        font-size: var(--font-size-xsm);
+    }
+
+    .table-container {
+        overflow-x: auto; /* horizontal scroll on mobile */
+    }
+}
 
 
 /* =========================

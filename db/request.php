@@ -29,8 +29,8 @@ try {
             /* ---------------- LOGIN PROCESS ---------------- */
             case "login":
 
-                $email = $_POST['auth_username'] ?? '';
-                $password = $_POST['auth_password'] ?? '';
+                $email = $_POST['email'] ?? '';
+                $password = $_POST['password'] ?? '';
 
                 if (empty($email) || empty($password)) {
                     $response = ["status" => "error", "message" => "Please enter both email and password"];
@@ -77,170 +77,321 @@ try {
                 break;
 
 
-            /* ---------------- RESET PASSWORD ---------------- */
-            case "reset_password":
-                $username = $_POST['username'] ?? '';
-                $newPassword = $_POST['password'] ?? '';
-
-                if (empty($username) || empty($newPassword)) {
-                    $response = ["status" => "error", "message" => "Username and password are required."];
-                    break;
-                }
-
-                // Check if admin exists
-                $admin = $mydb->select("users_auth", "*", ["auth_username" => $username]);
-
-                if (!$admin) {
-                    $response = ["status" => "error", "message" => "Username not found."];
-                    break;
-                }
-
-                $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
-                // Update password
-                $mydb->update("users_auth", ["auth_password" => $hashedPassword], ["auth_username" => $username]);
-
-                $response = ["status" => "success", "message" => "Password reset successfully."];
-                break;
-
-            
-            /* ---------------- GET TEACHERS FOR DATATABLE ---------------- */
+            /* ---------------- GET TEACHERS FOR TABLE ---------------- */
             case "getTeachers":
+                try {
+                    $search = $_POST["search"] ?? '';
+                    $page = intval($_POST["page"] ?? 1);
+                    $limit = 10;
+                    $offset = ($page - 1) * $limit;
 
-                // OPTIONAL: search
-                $search = $_POST['search'] ?? '';
+                    // Sorting
+                    $sortColumn = $_POST['sortColumn'] ?? 'id';
+                    $sortOrder = $_POST['sortOrder'] ?? 'DESC';
+                    $allowedSortColumns = ['name', 'department', 'age', 'id'];
+                    if (!in_array($sortColumn, $allowedSortColumns))
+                        $sortColumn = 'id';
+                    $sortOrder = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
 
-                $sql = "
-                    SELECT 
-                        users.id AS user_id,
-                        users.name,
-                        users.profile_photo,
-                        teachers.department,
-                        users.age,
-                        users.gender,
-                        users.birthdate,
-                        users.address,
-                        users.email
-                    FROM users
-                    INNER JOIN teachers ON teachers.teacher_id = users.id
-                    WHERE users.name LIKE ?
-                    ORDER BY users.id DESC
-                ";
+                    // Department filter
+                    $whereClauses = ["users.name LIKE ?"];
+                    $params = ["%$search%"];
+                    if (!empty($_POST['department'])) {
+                        $whereClauses[] = "teachers.department = ?";
+                        $params[] = $_POST['department'];
+                    }
+                    $whereSQL = implode(" AND ", $whereClauses);
 
-                $params = ["%$search%"];
-                $data = $mydb->rawQuery($sql, $params);
+                    // Total rows
+                    $countSql = "SELECT COUNT(*) AS total 
+                     FROM users 
+                     INNER JOIN teachers ON teachers.teacher_id = users.id 
+                     WHERE $whereSQL";
+                    $countData = $mydb->rawQuery($countSql, $params);
+                    $total = $countData[0]['total'];
 
-                $response = [
-                    "status" => "success",
-                    "data" => $data
-                ];
-                
+                    // Fetch paginated rows
+                    $sql = "SELECT 
+                    users.id AS user_id,
+                    users.name,
+                    users.profile_photo,
+                    teachers.department,
+                    users.age,
+                    users.gender,
+                    users.birthdate,
+                    users.address,
+                    users.email
+                FROM users
+                INNER JOIN teachers ON teachers.teacher_id = users.id
+                WHERE $whereSQL
+                ORDER BY $sortColumn $sortOrder
+                LIMIT $limit OFFSET $offset";
+
+                    $data = $mydb->rawQuery($sql, $params);
+
+                    $response = [
+                        "status" => "success",
+                        "data" => $data,
+                        "total" => $total,
+                        "limit" => $limit,
+                        "page" => $page
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to fetch teachers: " . $e->getMessage()
+                    ];
+                }
                 break;
-            
-            /* ---------------- GET STUDENTS FOR DATATABLE ---------------- */
+
+
+            /* ---------------- GET STUDENTS FOR TABLE ---------------- */
             case "getStudents":
+                try {
+                    $search = $_POST["search"] ?? '';
+                    $page = intval($_POST["page"] ?? 1);
+                    $limit = 10;
+                    $offset = ($page - 1) * $limit;
 
-                $search = $_POST['search'] ?? '';
+                    // Sorting
+                    $sortColumn = $_POST['sortColumn'] ?? 'id';
+                    $sortOrder = $_POST['sortOrder'] ?? 'DESC';
+                    $allowedSortColumns = ['name', 'lrn', 'age', 'id'];
+                    if (!in_array($sortColumn, $allowedSortColumns))
+                        $sortColumn = 'id';
+                    $sortOrder = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
 
-                $sql = "
-                    SELECT 
-                        users.id AS user_id,
-                        users.name,
-                        users.profile_photo,
-                        students.lrn,
-                        users.age,
-                        users.gender,
-                        users.birthdate,
-                        users.address,
-                        users.email,
-                        students.guardian_email,
-                        students.guardian_contact
-                    FROM users
-                    INNER JOIN students ON students.student_id = users.id
-                    WHERE users.name LIKE ?
-                    ORDER BY users.id DESC
-                ";
+                    // Search filter (no department for students)
+                    $whereClauses = ["users.name LIKE ?"];
+                    $params = ["%$search%"];
+                    $whereSQL = implode(" AND ", $whereClauses);
 
-                $params = ["%$search%"];
-                $data = $mydb->rawQuery($sql, $params);
+                    // Total rows
+                    $countSql = "SELECT COUNT(*) AS total 
+                     FROM users 
+                     INNER JOIN students ON students.student_id = users.id 
+                     WHERE $whereSQL";
+                    $countData = $mydb->rawQuery($countSql, $params);
+                    $total = $countData[0]['total'];
 
-                $response = [
-                    "status" => "success",
-                    "data" => $data
-                ];
+                    // Fetch paginated rows
+                    $sql = "SELECT 
+                    users.id AS user_id,
+                    users.name,
+                    users.profile_photo,
+                    students.lrn,
+                    users.age,
+                    users.gender,
+                    users.birthdate,
+                    users.address,
+                    users.email,
+                    students.guardian_email,
+                    students.guardian_contact
+                FROM users
+                INNER JOIN students ON students.student_id = users.id
+                WHERE $whereSQL
+                ORDER BY $sortColumn $sortOrder
+                LIMIT $limit OFFSET $offset";
 
+                    $data = $mydb->rawQuery($sql, $params);
+
+                    $response = [
+                        "status" => "success",
+                        "data" => $data,
+                        "total" => $total,
+                        "limit" => $limit,
+                        "page" => $page
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to fetch students: " . $e->getMessage()
+                    ];
+                }
                 break;
+
 
 
             /* ---------------- ADD NEW TEACHER ---------------- */
             case "addTeacher":
 
-                $fullname = $_POST['fullname'] ?? '';
-                $department = $_POST['departments'] ?? '';
-                $address = $_POST['address'] ?? '';
-                $birthdate = $_POST['birthdate'] ?? '';
-                $gender = $_POST['gender'] ?? '';
-                $email = $_POST['email'] ?? '';
-                $password = $_POST['password'] ?? '';
-                $isRegistered = $_POST['is_registered'] ?? 1;
-                $role = "teacher";
+                try {
+                    $fullname = $_POST['fullname'] ?? '';
+                    $department = $_POST['departments'] ?? '';
+                    $address = $_POST['address'] ?? '';
+                    $birthdate = $_POST['birthdate'] ?? '';
+                    $gender = $_POST['gender'] ?? '';
+                    $email = $_POST['email'] ?? '';
+                    $password = $_POST['password'] ?? '';
+                    $isRegistered = $_POST['is_registered'] ?? 1;
+                    $role = "teacher";
 
-                // Validate
-                if (empty($fullname) || empty($department) || empty($email) || empty($password)) {
-                    $response = ["status" => "error", "message" => "Please fill all required fields."];
-                    break;
+                    // Validate
+                    if (empty($fullname) || empty($department) || empty($address) || empty($birthdate) || empty($email) || empty($password)) {
+                        $response = ["status" => "error", "message" => "Please fill all required fields."];
+                        break;
+                    }
+
+                    // Check if email already exists
+                    $existing = $mydb->select("users", "*", ["email" => $email]);
+                    if ($existing) {
+                        $response = ["status" => "error", "message" => "Email already exists!"];
+                        break;
+                    }
+
+                    // Hash password
+                    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+                    // Auto age calculation
+                    if (!empty($birthdate)) {
+                        $age = (new DateTime())->diff(new DateTime($birthdate))->y;
+                    } else {
+                        $age = null;
+                    }
+
+                    // INSERT INTO USERS TABLE
+                    $mydb->insert("users", [
+                        "name" => $fullname,
+                        "profile_photo" => "default.png",
+                        "age" => $age,
+                        "gender" => $gender,
+                        "birthdate" => $birthdate,
+                        "address" => $address,
+                        "email" => $email,
+                        "password" => $hashedPassword,
+                        "role" => $role,
+                        "is_registered" => $isRegistered
+                    ]);
+
+                    $userId = $mydb->getLastId();
+
+                    if (!$userId) {
+                        $response = ["status" => "error", "message" => "Failed to create user record."];
+                        break;
+                    }
+
+                    // INSERT INTO TEACHERS TABLE
+                    $mydb->insert("teachers", [
+                        "teacher_id" => $userId,
+                        "department" => $department
+                    ]);
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Teacher added successfully",
+                        "user_id" => $userId
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to add teacher: " . $e->getMessage()
+                    ];
                 }
 
-                // Check if email already exists in users table
-                $existing = $mydb->select("users", "*", ["email" => $email]);
-                if ($existing) {
-                    $response = ["status" => "error", "message" => "Email already exists!"];
-                    break;
-                }
-
-                // hash password for login
-                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-                // Auto age calculation
-                if (!empty($birthdate)) {
-                    $age = (new DateTime())->diff(new DateTime($birthdate))->y;
-                } else {
-                    $age = null;
-                }
-
-                // INSERT USER
-                $mydb->insert("users", [
-                    "name" => $fullname,
-                    "profile_photo" => "default.png",
-                    "age" => $age,
-                    "gender" => $gender,
-                    "birthdate" => $birthdate,
-                    "address" => $address,
-                    "email" => $email,
-                    "password" => $hashedPassword,
-                    "role" => $role,
-                    "is_registered" => $isRegistered
-                ]);
-
-                $userId = $mydb->getLastId();
-
-                if (!$userId) {
-                    $response = ["status" => "error", "message" => "Failed to create user record."];
-                    break;
-                }
-
-                // INSERT TEACHER RECORD
-                $mydb->insert("teachers", [
-                    "teacher_id" => $userId,
-                    "department" => $department
-                ]);
-
-                $response = [
-                    "status" => "success",
-                    "message" => "Teacher added successfully",
-                    "user_id" => $userId
-                ];
                 break;
+
+
+            /* ---------------- ADD NEW STUDENT ---------------- */
+            case "addStudent":
+
+                try {
+                    $fullname = $_POST['fullname'] ?? '';
+                    $lrn = $_POST['lrn'] ?? '';
+                    $address = $_POST['address'] ?? '';
+                    $birthdate = $_POST['birthdate'] ?? '';
+                    $gender = $_POST['gender'] ?? '';
+                    $email = $_POST['email'] ?? '';
+                    $password = $_POST['password'] ?? '';
+                    $guardian_email = $_POST['guardian_email'] ?? '';
+                    $guardian_contact = $_POST['guardian_contact'] ?? '';
+                    $isRegistered = $_POST['is_registered'] ?? 1;
+                    $role = "student";
+
+                    // REQUIRED VALIDATION
+                    if (
+                        empty($fullname) || empty($lrn) || empty($address) || empty($birthdate) ||
+                        empty($guardian_contact) || empty($guardian_email) ||
+                        empty($email) || empty($password)
+                    ) {
+
+                        $response = ["status" => "error", "message" => "Please fill all required fields."];
+                        break;
+                    }
+
+                    // CHECK EMAIL DUPLICATE
+                    $existingEmail = $mydb->select("users", "*", ["email" => $email]);
+                    if ($existingEmail) {
+                        $response = ["status" => "error", "message" => "Email already exists!"];
+                        break;
+                    }
+
+                    // CHECK LRN DUPLICATE
+                    $existingLRN = $mydb->select("students", "*", ["lrn" => $lrn]);
+                    if ($existingLRN) {
+                        $response = ["status" => "error", "message" => "LRN already exists!"];
+                        break;
+                    }
+
+                    // HASH PASSWORD
+                    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+                    // AUTO AGE CALCULATION
+                    if (!empty($birthdate)) {
+                        $age = (new DateTime())->diff(new DateTime($birthdate))->y;
+                    } else {
+                        $age = null;
+                    }
+
+                    // INSERT INTO USERS
+                    $mydb->insert("users", [
+                        "name" => $fullname,
+                        "profile_photo" => "default.png",
+                        "age" => $age,
+                        "gender" => $gender,
+                        "birthdate" => $birthdate,
+                        "address" => $address,
+                        "email" => $email,
+                        "password" => $hashedPassword,
+                        "role" => $role,
+                        "is_registered" => $isRegistered
+                    ]);
+
+                    $userId = $mydb->getLastId();
+
+                    if (!$userId) {
+                        $response = ["status" => "error", "message" => "Failed to create user record."];
+                        break;
+                    }
+
+                    // INSERT INTO STUDENTS TABLE
+                    $mydb->insert("students", [
+                        "student_id" => $userId,
+                        "lrn" => $lrn,
+                        "guardian_email" => $guardian_email,
+                        "guardian_contact" => $guardian_contact
+                    ]);
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Student added successfully!",
+                        "user_id" => $userId
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to add student: " . $e->getMessage()
+                    ];
+                }
+
+                break;
+
+
+
+
 
 
 

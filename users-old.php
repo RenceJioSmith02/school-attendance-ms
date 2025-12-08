@@ -5,7 +5,6 @@ $mydb = new myDB();
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,171 +24,168 @@ $mydb = new myDB();
     <link rel="stylesheet" href="assets/css/main.css">
 
 </head>
-
 <body>
 
-    <!-- Overlay -->
-    <div id="overlay" style="display:none;"></div>
+        <!-- Overlay -->
+        <div id="overlay" style="display:none;"></div>
 
-    <!-- Add teacher form -->
-    <div class="form-container modal scroller-format" id="add-teacher">
+        <!-- Add teacher form -->
+        <div class="form-container modal scroller-format" id="add-teacher">
 
-        <div class="header flex jus-center al-center flex-col">
-            <h2>New Teacher</h2>
-            <p>Please fill up the required information.</p>
-            <span class="close-btn" onclick="hideModals()">&times;</span>
-        </div>
+            <div class="header flex jus-center al-center flex-col">
+                <h2>New Teacher</h2>
+                <p>Please fill up the required information.</p>
+                <span class="close-btn" onclick="hideModals()">&times;</span>
+            </div>
 
-        <form method="POST" id="AddTeacherForm" enctype="multipart/form-data">
+            <form method="POST" id="AddTeacherForm" enctype="multipart/form-data">
 
-            <div class="form-input-container flex jus-center al-center">
+                <div class="form-input-container flex jus-center al-center">
 
-                <div class="input-group">
-                    <label>Full Name</label>
-                    <input type="text" name="fullname" required placeholder="Juan Dele Cruz">
+                    <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" name="fullname" required placeholder="Juan Dele Cruz">
+                    </div>
+
+                    <div class="form-group flex jus-center al-center">
+                        <div class="input-group">
+                            <label>Department</label>
+                            <select name="departments" id="departments" required>
+                                <option value="" disabled selected>Select Department</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Science">Science</option>
+                                <option value="English">English</option>
+                                <option value="History">History</option>
+                                <option value="Physical Education">Physical Education</option>
+                                <option value="Arts">Arts</option>
+                                <option value="Music">Music</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Administration">Administration</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Address</label>
+                            <input type="text" name="address" placeholder="123 Main St" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group flex jus-center al-center">
+                        <div class="input-group">
+                            <label>Birthdate</label>
+                            <input type="date" name="birthdate" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Gender</label>
+                            <select name="gender" id="teacher_gender">
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group flex jus-center al-center">
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" name="email" placeholder="juan@gmail.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" name="password" placeholder="Enter your password" required><br>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="is_registered" value="1">
+
                 </div>
 
-                <div class="form-group flex jus-center al-center">
-                    <div class="input-group">
-                        <label>Department</label>
-                        <select name="departments" id="departments" required>
-                            <option value="" disabled selected>Select Department</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Science">Science</option>
-                            <option value="English">English</option>
-                            <option value="History">History</option>
-                            <option value="Physical Education">Physical Education</option>
-                            <option value="Arts">Arts</option>
-                            <option value="Music">Music</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Administration">Administration</option>
-                        </select>
+                <div class="form-buttons flex jus-center al-center flex-col gap10 mt20">
+                    <input class="btn-primary" style="width: 100%; font-weight:500; font-size: 15px;" type="submit" name="cerate" value="CREATE" style="max-width: 80px;">
+                </div>
+            </form>
+
+        </div>
+
+
+        <!-- Add student form -->
+        <div class="form-container modal scroller-format" id="add-student">
+
+            <div class="header flex jus-center al-center flex-col">
+                <h2>New Student</h2>
+                <p>Please fill up the required information.</p>
+                <span class="close-btn" onclick="hideModals()">&times;</span>
+            </div>
+
+            <form method="POST" id="AddStudentForm" enctype="multipart/form-data">
+
+                <div class="form-input-container flex jus-center al-center">
+
+                    <div class="form-group flex jus-center al-center">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" name="fullname" required placeholder="Juan Dele Cruz">
+                        </div>
+                        <div class="input-group">
+                            <label>LRN</label>
+                            <input type="text" name="lrn" placeholder="1054330007" required>
+                        </div>
                     </div>
+
+                    <div class="form-group flex jus-center al-center">
+                        <div class="input-group">
+                            <label>Birthdate</label>
+                            <input type="date" name="birthdate" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Gender</label>
+                            <select name="gender" id="student_gender">
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="input-group">
                         <label>Address</label>
                         <input type="text" name="address" placeholder="123 Main St" required>
                     </div>
+
+                    <div class="form-group flex jus-center al-center">
+                        <div class="input-group">
+                            <label>Guardian Contact</label>
+                            <input type="text" name="guardian_contact" placeholder="09070654368" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Guardian Email</label>
+                            <input type="email" name="guardian_email" placeholder="juan@gmail.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group flex jus-center al-center">
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" name="email" placeholder="juan@gmail.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" name="password" placeholder="Enter your password" required>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="is_registered" value="1">
+
                 </div>
 
-                <div class="form-group flex jus-center al-center">
-                    <div class="input-group">
-                        <label>Birthdate</label>
-                        <input type="date" name="birthdate" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Gender</label>
-                        <select name="gender" id="teacher_gender">
-                            <option value="" disabled selected>Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
+                <div class="form-buttons flex jus-center al-center flex-col gap10 mt20">
+                    <input class="btn-primary" style="width: 100%; font-weight:500; font-size: 15px;" type="submit" name="cerate" value="CREATE" style="max-width: 80px;">
                 </div>
+            </form>
 
-                <div class="form-group flex jus-center al-center">
-                    <div class="input-group">
-                        <label>Email</label>
-                        <input type="email" name="email" placeholder="juan@gmail.com">
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
-                        <input type="password" name="password" placeholder="Enter your password" required><br>
-                    </div>
-                </div>
-
-                <input type="hidden" name="is_registered" value="1">
-
-            </div>
-
-            <div class="form-buttons flex jus-center al-center flex-col gap10 mt20">
-                <input class="btn-primary" style="width: 100%; font-weight:500; font-size: 15px;" type="submit"
-                    name="cerate" value="CREATE" style="max-width: 80px;">
-            </div>
-        </form>
-
-    </div>
-
-
-    <!-- Add student form -->
-    <div class="form-container modal scroller-format" id="add-student">
-
-        <div class="header flex jus-center al-center flex-col">
-            <h2>New Student</h2>
-            <p>Please fill up the required information.</p>
-            <span class="close-btn" onclick="hideModals()">&times;</span>
         </div>
 
-        <form method="POST" id="AddStudentForm" enctype="multipart/form-data">
 
-            <div class="form-input-container flex jus-center al-center">
-
-                <div class="form-group flex jus-center al-center">
-                    <div class="input-group">
-                        <label>Full Name</label>
-                        <input type="text" name="fullname" required placeholder="Juan Dele Cruz">
-                    </div>
-                    <div class="input-group">
-                        <label>LRN</label>
-                        <input type="text" name="lrn" placeholder="1054330007" required>
-                    </div>
-                </div>
-
-                <div class="form-group flex jus-center al-center">
-                    <div class="input-group">
-                        <label>Birthdate</label>
-                        <input type="date" name="birthdate" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Gender</label>
-                        <select name="gender" id="student_gender">
-                            <option value="" disabled selected>Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Address</label>
-                    <input type="text" name="address" placeholder="123 Main St" required>
-                </div>
-
-                <div class="form-group flex jus-center al-center">
-                    <div class="input-group">
-                        <label>Guardian Contact</label>
-                        <input type="text" name="guardian_contact" placeholder="09070654368" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Guardian Email</label>
-                        <input type="email" name="guardian_email" placeholder="juan@gmail.com" required>
-                    </div>
-                </div>
-
-                <div class="form-group flex jus-center al-center">
-                    <div class="input-group">
-                        <label>Email</label>
-                        <input type="email" name="email" placeholder="juan@gmail.com" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
-                        <input type="password" name="password" placeholder="Enter your password" required>
-                    </div>
-                </div>
-
-                <input type="hidden" name="is_registered" value="1">
-
-            </div>
-
-            <div class="form-buttons flex jus-center al-center flex-col gap10 mt20">
-                <input class="btn-primary" style="width: 100%; font-weight:500; font-size: 15px;" type="submit"
-                    name="cerate" value="CREATE" style="max-width: 80px;">
-            </div>
-        </form>
-
-    </div>
-
-
-
+    
     <div class="container flex flex-col jus-start ">
 
         <!-- Header -->
@@ -205,12 +201,18 @@ $mydb = new myDB();
                 <div class="flex al-center jus center gap-10">
                     <button class="btn-primary" style="max-width: 150px;" id="reload">Reload</button>
                     <button class="btn-primary" style="max-width: 150px;" id="showAddTeacherForm">+ Add Teacher</button>
-                    <button class="btn-primary" style="max-width: 150px; display: none;" id="showAddStudentForm">+ Add
-                        Student</button>
+                    <button class="btn-primary" style="max-width: 150px; display: none;" id="showAddStudentForm">+ Add Student</button>
 
                     <select id="filterRole" class="btn-primary custom-filter" style="max-width: 150px;">
                         <option class="text-left" value="teacher">Teacher</option>
                         <option class="text-left" value="student">Student</option>
+                    </select>
+
+                    <select id="customShowEntries" class="btn-primary custom-filter" style="max-width: 150px;">
+                        <option class="text-left" value="10" selected>Show 10</option>
+                        <option class="text-left" value="25">Show 25</option>
+                        <option class="text-left" value="50">Show 50</option>
+                        <option class="text-left" value="100">Show 100</option>
                     </select>
 
                     <select id="filterDepartment" class="btn-primary custom-filter" style="max-width: 150px;">
@@ -225,17 +227,25 @@ $mydb = new myDB();
             </div>
 
             <div class="table-container">
-                <table id="usersTable">
-                    <thead id="tableHead"></thead>
-                    <tbody id="tableBody"></tbody>
+                <table class="table" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>no.</th>
+                            <th>Name</th>
+                            <th>Profile Photo</th>
+                            <th>Department</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Birthdate</th>
+                            <th>Address</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table rows will be populated here -->
+                    </tbody>
                 </table>
-
-                <!-- Pagination -->
-                <div class="pagination-container" style="text-align:right;">
-                    <button id="prevPage">&laquo; Prev</button>
-                    <span id="pageInfo">1 of 1</span>
-                    <button id="nextPage">Next &raquo;</button>
-                </div>
             </div>
 
         </div>
@@ -245,7 +255,7 @@ $mydb = new myDB();
 
 
 
-    <script src="assets/js/main.js"></script>
+<script src="assets/js/main.js"></script>
 
 <script>
 $(document).ready(function() {
@@ -522,5 +532,4 @@ $(document).ready(function() {
 
 
 </body>
-
 </html>
