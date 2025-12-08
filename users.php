@@ -224,11 +224,15 @@ $mydb = new myDB();
                 </div>
             </div>
 
+
             <div class="table-container">
-                <table id="usersTable">
-                    <thead id="tableHead"></thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+
+                <div class="table-scroll">
+                    <table id="usersTable">
+                        <thead id="tableHead"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
 
                 <!-- Pagination -->
                 <div class="pagination-container" style="text-align:right;">
@@ -236,7 +240,9 @@ $mydb = new myDB();
                     <span id="pageInfo">1 of 1</span>
                     <button id="nextPage">Next &raquo;</button>
                 </div>
+
             </div>
+
 
         </div>
 
@@ -363,7 +369,7 @@ $(document).ready(function() {
                         <td>${u.email}</td>
                         <td>
                             <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
-                            <button class="btn-secondary delete-user" data-id="${u.user_id}">Delete</button>
+                            <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
                         </td>
                     </tr>
                 `;
@@ -383,7 +389,7 @@ $(document).ready(function() {
                         <td>${u.guardian_contact}</td>
                         <td>
                             <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
-                            <button class="btn-secondary delete-user" data-id="${u.user_id}">Delete</button>
+                            <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
                         </td>
                     </tr>
                 `;
@@ -509,6 +515,51 @@ $(document).ready(function() {
             }
         });
     });
+
+
+    // --------------------- DELETE USER ---------------------
+    $(document).on("click", ".delete-user", function() {
+        let userId = $(this).data("id");
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#15285C',
+            cancelButtonColor: '#e74c3c',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "db/request.php",
+                    type: "POST",
+                    data: {
+                        action: "deleteUser",
+                        user_id: userId,
+                        role: currentRole
+                    },
+                    dataType: "json",
+                    success: function(res) {
+                        if (res.status === "success") {
+                            Swal.fire(
+                                'Deleted!',
+                                res.message,
+                                'success'
+                            );
+                            loadUsers(); // reload table
+                        } else {
+                            Swal.fire('Error', res.message, 'error');
+                        }
+                    },
+                    error: function(err) {
+                        Swal.fire('Error', 'Something went wrong', 'error');
+                    }
+                });
+            }
+        });
+    });
+
 
     // --------------------- RELOAD BUTTON ---------------------
     $("#reload").on("click", function() {

@@ -68,3 +68,33 @@ $("#showAddStudentForm").on("click", function (e) {
 });
 
 $("#overlay").on("click", hideModals);
+
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const table = document.querySelector("table");
+  let expandedCell = null; // store currently expanded cell
+
+  table.addEventListener("click", (e) => {
+    // Find the closest td or th
+    let cell = e.target.closest("td, th");
+
+    if (!cell) return;
+
+    // Ignore last column (actions)
+    const lastIndex = cell.parentNode.cells.length - 1;
+    if (cell.cellIndex === lastIndex) return;
+
+    // Collapse previously expanded cell if different
+    if (expandedCell && expandedCell !== cell) {
+      expandedCell.classList.remove("expanded");
+    }
+
+    // Toggle the clicked cell
+    cell.classList.toggle("expanded");
+
+    // Store it if expanded, otherwise clear
+    expandedCell = cell.classList.contains("expanded") ? cell : null;
+  });
+});

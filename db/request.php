@@ -390,6 +390,35 @@ try {
                 break;
 
 
+            /* ---------------- DELETE USER ---------------- */
+            case "deleteUser":
+                try {
+                    $userId = $_POST['user_id'] ?? 0;
+                    $role = $_POST['role'] ?? '';
+
+                    if (!$userId || !in_array($role, ['teacher', 'student'])) {
+                        $response = ["status" => "error", "message" => "Invalid request"];
+                        break;
+                    }
+
+                    // Delete from role-specific table first
+                    if ($role === "teacher") {
+                        $mydb->delete("teachers", ["teacher_id" => $userId]);
+                    } else {
+                        $mydb->delete("students", ["student_id" => $userId]);
+                    }
+
+                    // Delete from users table
+                    $mydb->delete("users", ["id" => $userId]);
+
+                    $response = ["status" => "success", "message" => "User deleted successfully"];
+                } catch (Exception $e) {
+                    $response = ["status" => "error", "message" => "Failed to delete user: " . $e->getMessage()];
+                }
+                break;
+
+
+
 
 
 

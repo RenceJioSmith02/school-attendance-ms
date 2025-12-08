@@ -372,6 +372,30 @@ a.btn-secondary:hover {
 }
 
 
+/* Delete Button */
+.btn-delete,
+a.btn-delete {
+  padding: 6px 25px;
+  background: transparent;
+  border: 1px solid #e74c3c; 
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: #e74c3c; 
+  cursor: pointer;
+  text-align: center;
+  display: inline-block;
+  transition: all 0.25s ease;
+}
+
+/* Hover effect */
+.btn-delete:hover,
+a.btn-delete:hover {
+  background: #e74c3c; 
+  color: #fff; 
+}
+
+
 /* =========================
    Search 
 ========================= */
@@ -427,96 +451,113 @@ a.btn-secondary:hover {
 
 
 
-/* =========================
-   Tables (Responsive & Scrollable)
-========================= */
 
+
+
+
+/* Container */
 .table-container {
     background: var(--white-pure);
     border-radius: var(--radius-md);
-    padding: 0 0 20px 0;
+    padding-bottom: 20px;
     box-shadow: var(--shadow-md);
-    overflow-x: auto; /* horizontal scroll */
-    color: var(--gray-cool);
-    font-family: var(--font-base);
+    overflow: hidden;
 }
 
+/* Horizontal scroll wrapper */
+.table-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+}
+
+/* Table */
 table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;   /* Keeps equal column width */
+    min-width: 900px;      /* Enables horizontal scroll on small screens */
     color: var(--gray-cool);
-    table-layout: auto; /* let columns size naturally */
+}
+
+/* Sticky header */
+thead th {
+    background: var(--primary-200);
+    color: white;
+    padding: 10px 16px;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    white-space: nowrap;
+    text-align: left;
+}
+
+thead th button {
+    background: transparent;
+    border: none;
+    color: white;
     font-size: var(--font-size-sm);
-    min-width: 800px; /* ensures scroll on small screens */
+    cursor: pointer;
 }
 
-thead {
-    background-color: var(--primary-200);
-    color: var(--white-pure);
-    display: table;
-    width: 100%;
-    font-weight: var(--font-weight-medium);
-}
-
+/* Scrollable body */
 tbody {
-    display: block;       /* allows vertical scroll independently */
-    width: 100%;
-    max-height: 60vh;     /* optional vertical scroll height */
+    display: block;
+    max-height: 60vh;
     overflow-y: auto;
-    overflow-x: auto;
 }
 
-tbody tr {
+/* KEEP TR BEHAVIOR NORMAL — not grid */
+tbody tr,
+thead tr {
     display: table;
     width: 100%;
-    table-layout: auto;
-    transition: background-color 0.2s;
+    table-layout: fixed;
 }
 
+/* Cells */
+td, th {
+    padding: 5px 16px;
+    border-bottom: 1px solid #dadada;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Action column fixed width */
+td:last-child,
+th:last-child {
+    width: 200px !important;
+}
+
+/* Hover */
 tbody tr:hover {
     background-color: var(--gray-light);
 }
 
-th, td {
-    padding: 10px 18px;
-    text-align: left;
-    border-bottom: 1px solid #d1d3db;
-    box-sizing: border-box;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-normal);
-    white-space: nowrap;   /* prevent breaking inside cells */
-    min-width: 120px;      /* minimum width per column */
-    word-break: break-all;
+tbody tr:hover td {
+    color: var(--gray-dark);
 }
 
-/* Last column fixed width for actions */
-table td:last-child,
-table th:last-child {
-    min-width: 180px;
-    max-width: 220px;
+/* Expanded cell */
+td.expanded,
+th.expanded {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    word-break: break-word; /* allows emails and long words to wrap */
+    hyphens: auto;
 }
 
-/* Sort buttons */
-th button {
-    background: none;
-    border: none;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+
+/* Mobile */
+@media (max-width: 768px) {
+    table {
+        min-width: 600px;
+    }
 }
 
-th button img.sort-arrow {
-    width: 12px;
-    height: 12px;
-    transition: transform 0.3s;
-}
-
-th button.asc img.sort-arrow {
-    transform: rotate(180deg);
-}
 
 
 /* =========================
