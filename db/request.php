@@ -100,6 +100,13 @@ try {
                         $whereClauses[] = "teachers.department = ?";
                         $params[] = $_POST['department'];
                     }
+
+                    // Registered filter
+                    if (isset($_POST['registered']) && $_POST['registered'] !== '') {
+                        $whereClauses[] = "users.is_registered = ?";
+                        $params[] = $_POST['registered'];
+                    }
+
                     $whereSQL = implode(" AND ", $whereClauses);
 
                     // Total rows
@@ -112,20 +119,21 @@ try {
 
                     // Fetch paginated rows
                     $sql = "SELECT 
-                    users.id AS user_id,
-                    users.name,
-                    users.profile_photo,
-                    teachers.department,
-                    users.age,
-                    users.gender,
-                    users.birthdate,
-                    users.address,
-                    users.email
-                FROM users
-                INNER JOIN teachers ON teachers.teacher_id = users.id
-                WHERE $whereSQL
-                ORDER BY $sortColumn $sortOrder
-                LIMIT $limit OFFSET $offset";
+                        users.id AS user_id,
+                        users.name,
+                        users.profile_photo,
+                        teachers.department,
+                        users.age,
+                        users.gender,
+                        users.birthdate,
+                        users.address,
+                        users.email,
+                        users.is_registered
+                    FROM users
+                    INNER JOIN teachers ON teachers.teacher_id = users.id
+                    WHERE $whereSQL
+                    ORDER BY $sortColumn $sortOrder
+                    LIMIT $limit OFFSET $offset";
 
                     $data = $mydb->rawQuery($sql, $params);
 
@@ -165,6 +173,13 @@ try {
                     // Search filter (no department for students)
                     $whereClauses = ["users.name LIKE ?"];
                     $params = ["%$search%"];
+
+                    // Registered filter
+                    if (isset($_POST['registered']) && $_POST['registered'] !== '') {
+                        $whereClauses[] = "users.is_registered = ?";
+                        $params[] = $_POST['registered'];
+                    }
+
                     $whereSQL = implode(" AND ", $whereClauses);
 
                     // Total rows
@@ -177,22 +192,23 @@ try {
 
                     // Fetch paginated rows
                     $sql = "SELECT 
-                    users.id AS user_id,
-                    users.name,
-                    users.profile_photo,
-                    students.lrn,
-                    users.age,
-                    users.gender,
-                    users.birthdate,
-                    users.address,
-                    users.email,
-                    students.guardian_email,
-                    students.guardian_contact
-                FROM users
-                INNER JOIN students ON students.student_id = users.id
-                WHERE $whereSQL
-                ORDER BY $sortColumn $sortOrder
-                LIMIT $limit OFFSET $offset";
+                        users.id AS user_id,
+                        users.name,
+                        users.profile_photo,
+                        students.lrn,
+                        users.age,
+                        users.gender,
+                        users.birthdate,
+                        users.address,
+                        users.email,
+                        students.guardian_email,
+                        students.guardian_contact,
+                        users.is_registered
+                    FROM users
+                    INNER JOIN students ON students.student_id = users.id
+                    WHERE $whereSQL
+                    ORDER BY $sortColumn $sortOrder
+                    LIMIT $limit OFFSET $offset";
 
                     $data = $mydb->rawQuery($sql, $params);
 
@@ -213,6 +229,25 @@ try {
                 break;
 
 
+            /* ---------------- REGITER NEW USER ---------------- */
+            case "registerUser":
+                try {
+                    $user_id = $_POST["user_id"];
+                    $sql = "UPDATE users SET is_registered = 1 WHERE id = ?";
+                    $mydb->rawQuery($sql, [$user_id]);
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "User successfully registered!"
+                    ];
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to register user: " . $e->getMessage()
+                    ];
+                }
+                break;
+
 
             /* ---------------- ADD NEW TEACHER ---------------- */
             case "addTeacher":
@@ -225,7 +260,7 @@ try {
                     $gender = $_POST['gender'] ?? '';
                     $email = $_POST['email'] ?? '';
                     $password = $_POST['password'] ?? '';
-                    $isRegistered = $_POST['is_registered'] ?? 1;
+                    $isRegistered = $_POST['is_registered'] ?? 0;
                     $role = "teacher";
 
                     // Validate
@@ -307,7 +342,7 @@ try {
                     $password = $_POST['password'] ?? '';
                     $guardian_email = $_POST['guardian_email'] ?? '';
                     $guardian_contact = $_POST['guardian_contact'] ?? '';
-                    $isRegistered = $_POST['is_registered'] ?? 1;
+                    $isRegistered = $_POST['is_registered'] ?? 0;
                     $role = "student";
 
                     // REQUIRED VALIDATION

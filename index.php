@@ -40,7 +40,7 @@
 
                 <div class="form-buttons flex jus-center al-center flex-col gap10 mt20">
                     <input class="btn-primary" style="width: 100%; font-weight:500; font-size: 15px;" type="submit" name="add_member" value="LOGIN" style="max-width: 80px;">
-                    <p>don't have an account? <a href="signup.html">Sign up</a></p>
+                    <p>don't have an account? <a href="signup.php">Sign up</a></p>
                 </div>
             </form>
         </div>

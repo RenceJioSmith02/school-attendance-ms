@@ -1003,6 +1003,11 @@ th.expanded {
   min-width: 350px;
 }
 
+#roleSelection {
+  width: 100%;
+  min-width: 350px;
+  max-width: 400px;
+}
 
 #logo {
   transition: transform 0.08s ease-out, filter 0.1s ease-out;

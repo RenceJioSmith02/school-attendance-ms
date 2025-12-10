@@ -221,6 +221,11 @@ $mydb = new myDB();
                         <option class="text-left" value="Filipino">Filipino</option>
                         <option class="text-left" value="Mapeh">Mapeh</option>
                     </select>
+
+                    <select id="filterRegistered" class="btn-primary custom-filter" style="max-width: 150px;">
+                        <option class="text-left" value="1">Registered</option>
+                        <option class="text-left" value="0">Unregistered</option>
+                    </select>
                 </div>
             </div>
 
@@ -330,6 +335,7 @@ $(document).ready(function() {
                 action: currentRole === "teacher" ? "getTeachers" : "getStudents",
                 search: $("#searchInput").val(),
                 department: $("#filterDepartment").val(),
+                registered: $("#filterRegistered").val(),
                 page: currentPage
             },
             dataType: "json",
@@ -350,11 +356,27 @@ $(document).ready(function() {
     }
 
     // --------------------- RENDER USERS ---------------------
+
     function renderUsers(data) {
         let rows = "";
         let count = (currentPage - 1) * 10 + 1;
 
         data.forEach(u => {
+
+            // Determine actions based on registration status
+            let actionButtons = "";
+
+            if (u.is_registered == 0) {
+                actionButtons = `
+                    <button class="btn-primary register-user" data-id="${u.user_id}">Register</button>
+                `;
+            } else {
+                actionButtons = `
+                    <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
+                    <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
+                `;
+            }
+
             if (currentRole === "teacher") {
                 rows += `
                     <tr>
@@ -367,10 +389,7 @@ $(document).ready(function() {
                         <td>${u.birthdate}</td>
                         <td>${u.address}</td>
                         <td>${u.email}</td>
-                        <td>
-                            <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
-                            <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
-                        </td>
+                        <td>${actionButtons}</td>
                     </tr>
                 `;
             } else {
@@ -387,10 +406,7 @@ $(document).ready(function() {
                         <td>${u.email}</td>
                         <td>${u.guardian_email}</td>
                         <td>${u.guardian_contact}</td>
-                        <td>
-                            <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
-                            <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
-                        </td>
+                        <td>${actionButtons}</td>
                     </tr>
                 `;
             }
@@ -398,6 +414,97 @@ $(document).ready(function() {
 
         $("#tableBody").html(rows);
     }
+
+
+        // --------------------- REGISTER USER ---------------------
+
+    $(document).on("click", ".register-user", function() {
+        let userId = $(this).data("id");
+
+        Swal.fire({
+            title: "Register this user?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#15285C",
+            cancelButtonColor: "#e74c3c",
+            confirmButtonText: "Register"
+        }).then((result) => {
+            if (result.isConfirmed) {
+
+                $.ajax({
+                    url: "db/request.php",
+                    type: "POST",
+                    data: {
+                        action: "registerUser",
+                        user_id: userId
+                    },
+                    dataType: "json",
+                    success: function(res) {
+                        if (res.status === "success") {
+                            Swal.fire("Success", res.message, "success");
+                            loadUsers();
+                        } else {
+                            Swal.fire("Error", res.message, "error");
+                        }
+                    },
+                    error: function() {
+                        Swal.fire("Error", "Something went wrong", "error");
+                    }
+                });
+
+            }
+        });
+    });
+
+
+    // function renderUsers(data) {
+    //     let rows = "";
+    //     let count = (currentPage - 1) * 10 + 1;
+
+    //     data.forEach(u => {
+    //         if (currentRole === "teacher") {
+    //             rows += `
+    //                 <tr>
+    //                     <td>${count++}</td>
+    //                     <td>${u.name}</td>
+    //                     <td><img src="assets/images/user_image/${u.profile_photo || 'default.png'}" width="40" style="border-radius:50%;"></td>
+    //                     <td>${u.department}</td>
+    //                     <td>${u.age}</td>
+    //                     <td>${u.gender}</td>
+    //                     <td>${u.birthdate}</td>
+    //                     <td>${u.address}</td>
+    //                     <td>${u.email}</td>
+    //                     <td>
+    //                         <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
+    //                         <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
+    //                     </td>
+    //                 </tr>
+    //             `;
+    //         } else {
+    //             rows += `
+    //                 <tr>
+    //                     <td>${count++}</td>
+    //                     <td>${u.name}</td>
+    //                     <td><img src="assets/images/user_image/${u.profile_photo || 'default.png'}" width="40" style="border-radius:50%;"></td>
+    //                     <td>${u.lrn}</td>
+    //                     <td>${u.age}</td>
+    //                     <td>${u.gender}</td>
+    //                     <td>${u.birthdate}</td>
+    //                     <td>${u.address}</td>
+    //                     <td>${u.email}</td>
+    //                     <td>${u.guardian_email}</td>
+    //                     <td>${u.guardian_contact}</td>
+    //                     <td>
+    //                         <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
+    //                         <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
+    //                     </td>
+    //                 </tr>
+    //             `;
+    //         }
+    //     });
+
+    //     $("#tableBody").html(rows);
+    // }
 
     // --------------------- SEARCH ---------------------
     $("#searchInput").on("input", function() {
@@ -420,6 +527,13 @@ $(document).ready(function() {
         currentPage = 1;
         loadUsers();
     });
+
+    // --------------------- REGISTERED FILTER ---------------------
+    $("#filterRegistered").on("change", function() {
+    currentPage = 1;
+        loadUsers();
+    });
+
 
     // --------------------- PAGINATION ---------------------
     function updatePagination() {
