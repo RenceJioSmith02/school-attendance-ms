@@ -93,8 +93,8 @@
         <div class="form-container" id="studentForm" style="display: none;">
 
             <div class="header flex jus-center al-center flex-col">
-                <h2>New Student</h2>
-                <p>Please fill up the required information.</p>
+                <h2>Sign Up</h2>
+                <p>Please fill up the the form with your information.</p>
             </div>
 
             <form method="POST" id="AddStudentForm" enctype="multipart/form-data">

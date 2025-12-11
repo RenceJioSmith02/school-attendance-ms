@@ -67,6 +67,16 @@ $("#showAddStudentForm").on("click", function (e) {
   showModal("add-student");
 });
 
+$("#showUpdateStudentForm").on("click", function (e) {
+  e.preventDefault();
+  showModal("update-student");
+});
+
+$("#showUpdateTeacherForm").on("click", function (e) {
+  e.preventDefault();
+  showModal("update-teacher");
+});
+
 $("#overlay").on("click", hideModals);
 
 

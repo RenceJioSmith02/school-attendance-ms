@@ -61,6 +61,34 @@ class myDB
     }
 
     // UPDATE DATA 
+    // public function update($table, $data, $where)
+    // {
+    //     try {
+    //         $set = [];
+    //         foreach ($data as $key => $value) {
+    //             $set[] = "$key = ?";
+    //         }
+
+    //         $conditions = [];
+    //         foreach ($where as $key => $value) {
+    //             $conditions[] = "$key = ?";
+    //         }
+
+    //         $sql = "UPDATE $table SET " . implode(", ", $set) . " WHERE " . implode(" AND ", $conditions);
+    //         $stmt = $this->conn->prepare($sql);
+    //         if (!$stmt) {
+    //             throw new Exception("Prepare failed: " . $this->conn->error);
+    //         }
+
+    //         $types = str_repeat("s", count($data) + count($where));
+    //         $stmt->bind_param($types, ...array_merge(array_values($data), array_values($where)));
+    //         $stmt->execute();
+    //         $stmt->close();
+    //     } catch (Exception $e) {
+    //         die("Error while updating data: " . $e->getMessage());
+    //     }
+    // }
+
     public function update($table, $data, $where)
     {
         try {
@@ -83,11 +111,16 @@ class myDB
             $types = str_repeat("s", count($data) + count($where));
             $stmt->bind_param($types, ...array_merge(array_values($data), array_values($where)));
             $stmt->execute();
+
+            $affectedRows = $stmt->affected_rows; // ✅ get affected rows
+
             $stmt->close();
+            return $affectedRows; // ✅ return it
         } catch (Exception $e) {
             die("Error while updating data: " . $e->getMessage());
         }
     }
+
 
     // SELECT DATA
     public function select($table, $columns = "*", $where = null)
@@ -126,6 +159,18 @@ class myDB
             die("Error while selecting data: " . $e->getMessage());
         }
     }
+
+    // SELECT SINGLE ROW
+    public function select_one($table, $columns = "*", $where = null)
+    {
+        try {
+            $rows = $this->select($table, $columns, $where);
+            return $rows ? $rows[0] : null; // return first row or null
+        } catch (Exception $e) {
+            die("Error while selecting single row: " . $e->getMessage());
+        }
+    }
+
 
     // DELETE DATA
     public function delete($table, $where)

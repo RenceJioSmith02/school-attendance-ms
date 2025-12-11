@@ -53,7 +53,62 @@
   </div>
 
 
+
+
+
 <script>
+$("#loginForm").on("submit", function(e) {
+    e.preventDefault();
+
+    let email = $("input[name='email']").val();
+    let password = $("input[name='password']").val();
+
+    $.ajax({
+        url: "db/request.php",
+        type: "POST",
+        data: {
+            action: "login",
+            email: email,
+            password: password
+        },
+        dataType: "json",
+
+        success: function(res) {
+            if (res.status === "success") {
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Login Successful!",
+                    timer: 1200,
+                    showConfirmButton: false
+                });
+
+                // Redirect based on PHP response
+                setTimeout(() => {
+                    window.location.href = res.redirect;
+                }, 1200);
+
+            } else {
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Login Failed",
+                    text: res.message,
+                });
+
+            }
+        },
+
+        error: function(xhr) {
+            console.log(xhr.responseText);
+            Swal.fire("Error", "Something went wrong!", "error");
+        }
+    });
+});
+
+
+
+
   const logo = document.getElementById("logo");
 
   document.addEventListener("mousemove", (e) => {

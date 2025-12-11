@@ -1,0 +1,24 @@
+[11-Dec-2025 22:56:51 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 553
+[11-Dec-2025 22:56:51 Asia/Manila] PHP Fatal error:  Uncaught Error: Call to undefined method myDB::prepare() in C:\xampp\htdocs\school_attendance_ms\db\request.php:556
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 556
+[11-Dec-2025 22:56:56 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 553
+[11-Dec-2025 22:56:56 Asia/Manila] PHP Fatal error:  Uncaught Error: Call to undefined method myDB::prepare() in C:\xampp\htdocs\school_attendance_ms\db\request.php:556
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 556
+[11-Dec-2025 22:57:05 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 553
+[11-Dec-2025 22:57:05 Asia/Manila] PHP Fatal error:  Uncaught Error: Call to undefined method myDB::prepare() in C:\xampp\htdocs\school_attendance_ms\db\request.php:556
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 556
+[11-Dec-2025 23:04:19 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 566
+[11-Dec-2025 23:04:58 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 566
+[11-Dec-2025 23:05:09 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 566
+[11-Dec-2025 23:05:28 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 566
+[11-Dec-2025 23:06:19 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 566
+[11-Dec-2025 23:06:46 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 566
+[11-Dec-2025 23:19:12 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 570
+[11-Dec-2025 23:19:50 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 570
+[11-Dec-2025 23:20:52 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 570

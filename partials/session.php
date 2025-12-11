@@ -1,36 +1,30 @@
 <?php
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// // Include database connection
+// If not logged in → redirect to login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../index.php?ERROR=1");
+    exit;
+}
+
+// Include DB
 // require_once "../db/db.php";
 // $mydb = new myDB();
 
-// Check if logged in
-if (!isset($_SESSION['auth_id']) || !isset($_SESSION['username'])) {
-    header("Location: index.php?ERROR=1&user_id=". $_SESSION['auth_id']."&username=". $_SESSION['username']);
-    exit;
-}
+// Verify the session user still exists
+$user = $mydb->select_one("users", "*", ["id" => $_SESSION['user_id']]);
 
-// Validate user, ensure not deleted
-$userAuth = $mydb->select("users_auth", "*", [
-    "auth_id" => $_SESSION['auth_id'],
-    "auth_username" => $_SESSION['username']
-]);
-
-if (!$userAuth) {
+// If user not found (deleted) → force logout
+if (!$user) {
     session_unset();
     session_destroy();
-    header("Location: index.php?ERROR=2");
+    header("Location: ../index.php?ERROR=2");
     exit;
 }
 
-$userAuth = $userAuth[0];
-
-// Refresh session data
-$_SESSION['user_id'] = $userAuth['auth_id'];
-$_SESSION['username'] = $userAuth['auth_username'];
-$_SESSION['user_role'] = $userAuth['auth_role'];
-
+// Refresh session with updated data
+$_SESSION['email'] = $user['email'];
+$_SESSION['user_role'] = $user['role'];
+?>

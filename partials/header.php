@@ -9,11 +9,13 @@
 
     <!-- Desktop Links -->
     <div class="links">
-        <a class="link" href="dashboard.php">Dashboard</a>
+        <a class="link" href="users.php">Users</a>
         &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-        <a class="link" href="users.php">Report</a>
+        <a class="link" href="class.php">class</a>
         &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-        <a class="link" href="users.php">Profile</a>
+        <a class="link" href="report.php">Report</a>
+        &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+        <a class="link" href="profile.php">Profile</a>
     </div>
 
     <!-- Desktop Logout Button -->
@@ -31,10 +33,40 @@
 <!-- Mobile Sidebar -->
 <div class="sidebar" id="mobileSidebar">
 
-    <a class="link" href="dashboard.php">Dashboard</a>
-    <a class="link" href="users.php">Report</a>
-    <a class="link" href="users.php">Profile</a>
+    <a class="link" href="users.php">Users</a>
+    <a class="link" href="class.php">Class</a>
+    <a class="link" href="report.php">Report</a>
+    <a class="link" href="profile.php">Profile</a>
 
     <button class="btn-secondary" style="margin-top:20px;">Logout</button>
 
 </div>
+
+
+<script>
+    // =============================
+    // Logout process
+    // =============================
+    $(document).on("click", ".btn-secondary", function (e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: "db/request.php",
+            type: "POST",
+            data: { action: "logout" },
+            dataType: "json",
+            success: function (response) {
+                if (response.status === "success") {
+                    // Redirect to login page
+                    window.location.href = "index.php";
+                } else {
+                    alert(response.message || "Logout failed.");
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Logout Error:", error);
+                alert("Something went wrong during logout.");
+            }
+        });
+    });
+</script>

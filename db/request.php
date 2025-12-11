@@ -37,7 +37,7 @@ try {
                     break;
                 }
 
-                // fetch from users table
+                // get user
                 $user = $mydb->select("users", "*", ["email" => $email]);
 
                 if (!$user) {
@@ -47,24 +47,33 @@ try {
 
                 $user = $user[0];
 
+                // verify password
                 if (!password_verify($password, $user['password'])) {
                     $response = ["status" => "error", "message" => "Invalid email or password"];
                     break;
                 }
 
-                // SUCCESS
+                // set session
                 $_SESSION['user_id'] = $user["id"];
-                $_SESSION['username'] = $user["email"];
+                $_SESSION['email'] = $user["email"];
                 $_SESSION['user_role'] = $user["role"];
+
+                // role-based redirect
+                if ($user["role"] === "admin") {
+                    $redirectPage = "users.php";
+                } else {
+                    $redirectPage = "class.php";
+                }
 
                 $response = [
                     "status" => "success",
                     "message" => "Login successful",
-                    "redirect" => "dashboard.php"
+                    "redirect" => $redirectPage
                 ];
                 break;
+                
 
-
+            /* ---------------- LOGOUT PROCESS ---------------- */
             case "logout":
                 $_SESSION = []; //clears all session data.
                 session_unset();
@@ -227,6 +236,82 @@ try {
                     ];
                 }
                 break;
+
+
+            /* ---------------- GET USER INFO ---------------- */
+            case "get_user_info":
+                try {
+                    if (!isset($_SESSION['user_id'])) {
+                        $response = [
+                            "status" => "error",
+                            "message" => "Not logged in"
+                        ];
+                        break;
+                    }
+
+                    $user_id = $_SESSION['user_id'];
+                    $role = $_SESSION['user_role'];
+
+                    // Get main user record
+                    $user = $mydb->select_one("users", "*", ["id" => $user_id]);
+
+                    if (!$user) {
+                        $response = [
+                            "status" => "error",
+                            "message" => "User not found"
+                        ];
+                        break;
+                    }
+
+                    // Base data for all roles
+                    $data = [
+                        "fullname" => $user["name"],
+                        "email" => $user["email"],
+                        "role" => $role,
+                        "address" => $user["address"],
+                        "gender" => $user["gender"],
+                        "birthdate" => $user["birthdate"],
+                    ];
+
+                    // Teacher info
+                    if ($role === "teacher") {
+                        $teacher = $mydb->select_one("teachers", "*", [
+                            "teacher_id" => $user_id
+                        ]);
+
+                        if ($teacher) {
+                            $data["department"] = $teacher["department"];
+                        }
+                    }
+
+                    // Student info
+                    if ($role === "student") {
+                        $student = $mydb->select_one("students", "*", [
+                            "student_id" => $user_id
+                        ]);
+
+                        if ($student) {
+                            $data["lrn"] = $student["lrn"];
+                            $data["guardian_contact"] = $student["guardian_contact"];
+                            $data["guardian_email"] = $student["guardian_email"];
+                        }
+                    }
+
+                    $response = [
+                        "success" => true,
+                        "message" => "User info loaded",
+                        "data" => $data
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to fetch user info: " . $e->getMessage()
+                    ];
+                }
+                break;
+
+
 
 
             /* ---------------- REGITER NEW USER ---------------- */
@@ -423,6 +508,116 @@ try {
                 }
 
                 break;
+
+
+            /* ---------------- UPDATE TEACHER ---------------- */
+            case "update_teacher":
+                try {
+                    $userId = $_SESSION["user_id"];
+
+                    // Check for duplicate email
+                    $existingEmail = $mydb->select_one("users", "*", ["email" => $_POST["email"]]);
+                    if ($existingEmail && $existingEmail["id"] != $userId) {
+                        $response = [
+                            "status" => "error",
+                            "message" => "Email is already in use."
+                        ];
+                        break;
+                    }
+
+                    // Prepare data for update
+                    $userData = [
+                        "name" => $_POST["fullname"],
+                        "address" => $_POST["address"],
+                        "birthdate" => $_POST["birthdate"],
+                        "gender" => $_POST["gender"],
+                        "email" => $_POST["email"]
+                    ];
+
+                    // Optional password
+                    if (!empty($_POST["password"])) {
+                        $userData["password"] = password_hash($_POST["password"], PASSWORD_DEFAULT);
+                    }
+
+                    $rowsUpdated = $mydb->update("users", $userData, ["id" => $userId]);
+                    $rowsUpdatedTeacher = $mydb->update("teachers", ["department" => $_POST["departments"]], ["teacher_id" => $userId]);
+
+                    if ($rowsUpdated > 0 || $rowsUpdatedTeacher > 0) {
+                        $response = [
+                            "status" => "success",
+                            "message" => "Teacher updated successfully"
+                        ];
+                    } else {
+                        $response = [
+                            "status" => "error",
+                            "message" => "No changes were made (check IDs and input values)."
+                        ];
+                    }
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to update teacher: " . $e->getMessage()
+                    ];
+                }
+                break;
+
+
+
+            /* ---------------- UPDATE STUDENT ---------------- */
+            case "update_student":
+                try {
+                    $userId = $_SESSION["user_id"];
+
+                    // Check for duplicate email
+                    $existingEmail = $mydb->select_one("users", "*", ["email" => $_POST["email"]]);
+                    if ($existingEmail && $existingEmail["id"] != $userId) {
+                        $response = [
+                            "status" => "error",
+                            "message" => "Email is already in use."
+                        ];
+                        break;
+                    }
+
+                    // Update users table
+                    $userData = [
+                        "name" => $_POST["fullname"],
+                        "address" => $_POST["address"],
+                        "birthdate" => $_POST["birthdate"],
+                        "gender" => $_POST["gender"],
+                        "email" => $_POST["email"]
+                    ];
+
+                    // Optional password
+                    if (!empty($_POST["password"])) {
+                        $userData["password"] = password_hash($_POST["password"], PASSWORD_DEFAULT);
+                    }
+
+                    // Update students table
+                    $studentData = [
+                        "lrn" => $_POST["lrn"],
+                        "guardian_contact" => $_POST["guardian_contact"],
+                        "guardian_email" => $_POST["guardian_email"]
+                    ];
+
+                    $rowsUpdated = $mydb->update("users", $userData, ["id" => $userId]);
+                    $rowsUpdatedStudent = $mydb->update("students", $studentData, ["student_id" => $userId]);
+
+                    if ($rowsUpdated > 0 || $rowsUpdatedStudent > 0) {
+                        $response = ["status" => "success", "message" => "Student updated successfully"];
+                    } else {
+                        $response = ["status" => "error", "message" => "No changes were made (check IDs and input values)."];
+                    }
+
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to update student: " . $e->getMessage()
+                    ];
+                }
+                break;
+
 
 
             /* ---------------- DELETE USER ---------------- */
