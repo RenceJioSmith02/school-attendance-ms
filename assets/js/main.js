@@ -87,6 +87,8 @@ $("#showUpdatePasswordForm").on("click", function (e) {
   showModal("update-admin-password");
 });
 
+
+
 $("#overlay").on("click", hideModals);
 
 

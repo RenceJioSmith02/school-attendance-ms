@@ -552,6 +552,17 @@ th.expanded {
     hyphens: auto;
 }
 
+.noRecord {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-size: var(--font-size-xl);
+  color: var(--gray-cool);
+  font-weight: var(--font-weight-bold);
+}
+
 
 /* Mobile */
 @media (max-width: 768px) {
@@ -877,7 +888,7 @@ th.expanded {
 
 /* ========== MIDDLE SECTION ========== */
 .card-main {
-    background: #CFFFEF; /* CARD MIDDLE PART BG COLOR TO */
+    /* background: #CFFFEF; CARD MIDDLE PART BG COLOR TO */
     padding: 22px;
     height: 63%;  
 }

@@ -11,7 +11,7 @@
     <div class="links">
         <a class="link" href="users.php">Users</a>
         &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-        <a class="link" href="class.php">class</a>
+        <a class="link" href="classrooms.php">Classrooms</a>
         &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
         <a class="link" href="report.php">Report</a>
         &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
@@ -36,7 +36,7 @@
 <div class="sidebar" id="mobileSidebar">
 
     <a class="link" href="users.php">Users</a>
-    <a class="link" href="class.php">Class</a>
+    <a class="link" href="classrooms.php">Classrooms</a>
     <a class="link" href="report.php">Report</a>
     <a class="link" href="profile.php"><?php echo (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')
         ? 'Settings'

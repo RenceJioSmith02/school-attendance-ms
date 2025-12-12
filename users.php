@@ -418,7 +418,7 @@ $(document).ready(function() {
     }
 
 
-        // --------------------- REGISTER USER ---------------------
+    // --------------------- REGISTER USER ---------------------
 
     $(document).on("click", ".register-user", function() {
         let userId = $(this).data("id");
@@ -458,55 +458,6 @@ $(document).ready(function() {
         });
     });
 
-
-    // function renderUsers(data) {
-    //     let rows = "";
-    //     let count = (currentPage - 1) * 10 + 1;
-
-    //     data.forEach(u => {
-    //         if (currentRole === "teacher") {
-    //             rows += `
-    //                 <tr>
-    //                     <td>${count++}</td>
-    //                     <td>${u.name}</td>
-    //                     <td><img src="assets/images/user_image/${u.profile_photo || 'default.png'}" width="40" style="border-radius:50%;"></td>
-    //                     <td>${u.department}</td>
-    //                     <td>${u.age}</td>
-    //                     <td>${u.gender}</td>
-    //                     <td>${u.birthdate}</td>
-    //                     <td>${u.address}</td>
-    //                     <td>${u.email}</td>
-    //                     <td>
-    //                         <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
-    //                         <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
-    //                     </td>
-    //                 </tr>
-    //             `;
-    //         } else {
-    //             rows += `
-    //                 <tr>
-    //                     <td>${count++}</td>
-    //                     <td>${u.name}</td>
-    //                     <td><img src="assets/images/user_image/${u.profile_photo || 'default.png'}" width="40" style="border-radius:50%;"></td>
-    //                     <td>${u.lrn}</td>
-    //                     <td>${u.age}</td>
-    //                     <td>${u.gender}</td>
-    //                     <td>${u.birthdate}</td>
-    //                     <td>${u.address}</td>
-    //                     <td>${u.email}</td>
-    //                     <td>${u.guardian_email}</td>
-    //                     <td>${u.guardian_contact}</td>
-    //                     <td>
-    //                         <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
-    //                         <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
-    //                     </td>
-    //                 </tr>
-    //             `;
-    //         }
-    //     });
-
-    //     $("#tableBody").html(rows);
-    // }
 
     // --------------------- SEARCH ---------------------
     $("#searchInput").on("input", function() {
@@ -599,6 +550,7 @@ $(document).ready(function() {
                     Swal.fire({ icon: "success", title: "Teacher Added!", timer: 1500, showConfirmButton: false });
                     $("#AddTeacherForm")[0].reset();
                     loadUsers();
+                    hideModals();
                 } else {
                     Swal.fire({ icon: "error", title: "Error", text: res.message });
                 }
@@ -625,6 +577,7 @@ $(document).ready(function() {
                     Swal.fire({ icon: "success", title: "Student Added!", timer: 1500, showConfirmButton: false });
                     $("#AddStudentForm")[0].reset();
                     loadUsers();
+                    hideModals();
                 } else {
                     Swal.fire({ icon: "error", title: "Error", text: res.message });
                 }
@@ -664,6 +617,7 @@ $(document).ready(function() {
                                 'success'
                             );
                             loadUsers(); // reload table
+                            hideModals();
                         } else {
                             Swal.fire('Error', res.message, 'error');
                         }

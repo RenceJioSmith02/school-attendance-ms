@@ -46,9 +46,15 @@ include_once 'partials/session.php'
 
             <div class="form-input-container flex jus-center al-center">
 
-                <div class="input-group">
-                    <label>Full Name</label>
-                    <input type="text" name="fullname" required placeholder="Juan Dele Cruz">
+                <div class="form-group flex jus-center al-center">
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" name="fullname" required placeholder="Juan Dele Cruz">
+                    </div>
+                    <div class="input-group">
+                        <label>Profile Photo</label>
+                        <input type="file" name="profile_photo">
+                    </div>
                 </div>
 
                 <div class="form-group flex jus-center al-center">
@@ -131,8 +137,8 @@ include_once 'partials/session.php'
                         <input type="text" name="fullname" required placeholder="Juan Dele Cruz">
                     </div>
                     <div class="input-group">
-                        <label>LRN</label>
-                        <input type="text" name="lrn" placeholder="1054330007" required>
+                        <label>Profile Photo</label>
+                        <input type="file" name="profile_photo">
                     </div>
                 </div>
 
@@ -151,9 +157,15 @@ include_once 'partials/session.php'
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label>Address</label>
-                    <input type="text" name="address" placeholder="123 Main St" required>
+                <div class="form-group flex jus-center al-center">
+                    <div class="input-group">
+                        <label>Address</label>
+                        <input type="text" name="address" placeholder="123 Main St" required>
+                    </div>
+                    <div class="input-group">
+                        <label>LRN</label>
+                        <input type="text" name="lrn" placeholder="1054330007" required>
+                    </div>
                 </div>
 
                 <div class="form-group flex jus-center al-center">
@@ -207,60 +219,60 @@ include_once 'partials/session.php'
                 <div class="form-group flex jus-center al-center">
                     <div class="input-group">
                         <label>Quarter Name</label>
-                        <input type="text" name="quarter_name[]" placeholder="First Quarter" required>
+                        <input type="text" name="quarter_name[]" placeholder="First Quarter">
                     </div>
                     <div class="input-group">
                         <label>From</label>
-                        <input type="date" name="start_date[]" required>
+                        <input type="date" name="start_date[]">
                     </div>
                      <div class="input-group">
                         <label>To</label>
-                        <input type="date" name="end_date[]" required>
+                        <input type="date" name="end_date[]">
                     </div>
                 </div>
 
                 <div class="form-group flex jus-center al-center">
                     <div class="input-group">
                         <label>Quarter Name</label>
-                        <input type="text" name="quarter_name[]" placeholder="First Quarter" required>
+                        <input type="text" name="quarter_name[]" placeholder="First Quarter">
                     </div>
                     <div class="input-group">
                         <label>From</label>
-                        <input type="date" name="start_date[]" required>
+                        <input type="date" name="start_date[]">
                     </div>
                      <div class="input-group">
                         <label>To</label>
-                        <input type="date" name="end_date[]" required>
+                        <input type="date" name="end_date[]">
                     </div>
                 </div>
 
                 <div class="form-group flex jus-center al-center">
                     <div class="input-group">
                         <label>Quarter Name</label>
-                        <input type="text" name="quarter_name[]" placeholder="First Quarter" required>
+                        <input type="text" name="quarter_name[]" placeholder="First Quarter">
                     </div>
                     <div class="input-group">
                         <label>From</label>
-                        <input type="date" name="start_date[]" required>
+                        <input type="date" name="start_date[]">
                     </div>
                      <div class="input-group">
                         <label>To</label>
-                        <input type="date" name="end_date[]" required>
+                        <input type="date" name="end_date[]">
                     </div>
                 </div>
 
                 <div class="form-group flex jus-center al-center">
                     <div class="input-group">
                         <label>Quarter Name</label>
-                        <input type="text" name="quarter_name[]" placeholder="First Quarter" required>
+                        <input type="text" name="quarter_name[]" placeholder="First Quarter">
                     </div>
                     <div class="input-group">
                         <label>From</label>
-                        <input type="date" name="start_date[]" required>
+                        <input type="date" name="start_date[]">
                     </div>
                      <div class="input-group">
                         <label>To</label>
-                        <input type="date" name="end_date[]" required>
+                        <input type="date" name="end_date[]">
                     </div>
                 </div>
 
@@ -467,6 +479,7 @@ include_once 'partials/session.php'
                     const d = res.data;
 
                     // ===== UPDATE PROFILE HEADER =====
+                    $("#profilePhoto").attr("src", "assets/images/user_image/" + d.profile_photo);
                     $("#profileName").text(d.fullname);
                     $("#profileRole").text(d.role);
                     $("#gender").text(d.gender);
@@ -607,9 +620,9 @@ include_once 'partials/session.php'
                             if (emailChanged || passwordChanged) {
                                 forceLogout();
                             } else {
-                                // hideModals();
-                                // loadUserProfile();
-                                location.reload();
+                                loadUserProfile();
+                                hideModals();
+                                // location.reload();
                             }
                         });
                     } else {
@@ -647,9 +660,9 @@ include_once 'partials/session.php'
                             if (emailChanged || passwordChanged) {
                                 forceLogout();
                             } else {
-                                // hideModals();
-                                // loadUserProfile();
-                                location.reload();
+                                loadUserProfile();
+                                hideModals();
+                                // location.reload();
                             }
                         });
                     } else {
@@ -681,7 +694,10 @@ include_once 'partials/session.php'
                     if (response.status === "success") {
 
                         Swal.fire("Updated!", "Quarter settings updated successfully!", "success")
-                        .then(() => location.reload());
+                        .then(() => {
+                            loadUserProfile();
+                            hideModals();
+                        });
 
                     } else {
                         Swal.fire("Error!", response.message, "error");

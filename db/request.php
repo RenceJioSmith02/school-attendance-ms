@@ -47,6 +47,12 @@ try {
 
                 $user = $user[0];
 
+                // verify registration
+                if ($user['is_registered'] == 0) {
+                    $response = ["status" => "error", "message" => "Account not registered. Please contact the administrator."];
+                    break;
+                }
+
                 // verify password
                 if (!password_verify($password, $user['password'])) {
                     $response = ["status" => "error", "message" => "Invalid email or password"];
@@ -62,7 +68,7 @@ try {
                 if ($user["role"] === "admin") {
                     $redirectPage = "users.php";
                 } else {
-                    $redirectPage = "class.php";
+                    $redirectPage = "classrooms.php";
                 }
 
                 $response = [
@@ -272,6 +278,7 @@ try {
                         "gender" => $user["gender"],
                         "birthdate" => $user["birthdate"],
                         "is_registered" => $user["is_registered"],
+                        "profile_photo" => $user["profile_photo"],
                     ];
 
                     // Teacher info
@@ -543,14 +550,42 @@ try {
                     // Check for duplicate email
                     $existingEmail = $mydb->select_one("users", "*", ["email" => $_POST["email"]]);
                     if ($existingEmail && $existingEmail["id"] != $userId) {
-                        $response = [
-                            "status" => "error",
-                            "message" => "Email is already in use."
-                        ];
+                        $response = ["status" => "error", "message" => "Email is already in use."];
                         break;
                     }
 
-                    // Prepare data for update
+                    // ========== HANDLE IMAGE UPLOAD ==========
+                    $uploadDir = "../assets/images/user_image/";
+                    $photoFilename = null;
+
+                    if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] === UPLOAD_ERR_OK) {
+
+                        // Get old image
+                        $old = $mydb->select_one("users", "profile_photo", ["id" => $userId]);
+                        $oldImage = $old ? $old["profile_photo"] : null;
+
+                        $tmp = $_FILES['profile_photo']['tmp_name'];
+                        $ext = pathinfo($_FILES['profile_photo']['name'], PATHINFO_EXTENSION);
+                        $rand = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 6);
+                        $newName = $userId . "-" . $rand . "." . strtolower($ext);
+
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0777, true);
+                        }
+
+                        if (move_uploaded_file($tmp, $uploadDir . $newName)) {
+                            $photoFilename = $newName;
+
+                            // Delete old image if not default
+                            if ($oldImage && $oldImage !== "default.png") {
+                                $oldPath = $uploadDir . $oldImage;
+                                if (file_exists($oldPath))
+                                    unlink($oldPath);
+                            }
+                        }
+                    }
+
+                    // Prepare user update data
                     $userData = [
                         "name" => $_POST["fullname"],
                         "address" => $_POST["address"],
@@ -559,31 +594,23 @@ try {
                         "email" => $_POST["email"]
                     ];
 
-                    // Optional password
+                    if ($photoFilename) {
+                        $userData["profile_photo"] = $photoFilename;
+                    }
+
                     if (!empty($_POST["password"])) {
                         $userData["password"] = password_hash($_POST["password"], PASSWORD_DEFAULT);
                     }
 
-                    $rowsUpdated = $mydb->update("users", $userData, ["id" => $userId]);
-                    $rowsUpdatedTeacher = $mydb->update("teachers", ["department" => $_POST["departments"]], ["teacher_id" => $userId]);
+                    $mydb->update("users", $userData, ["id" => $userId]);
 
-                    if ($rowsUpdated > 0 || $rowsUpdatedTeacher > 0) {
-                        $response = [
-                            "status" => "success",
-                            "message" => "Teacher updated successfully"
-                        ];
-                    } else {
-                        $response = [
-                            "status" => "error",
-                            "message" => "No changes were made (check IDs and input values)."
-                        ];
-                    }
+                    // Update teacher table
+                    $mydb->update("teachers", ["department" => $_POST["departments"]], ["teacher_id" => $userId]);
+
+                    $response = ["status" => "success", "message" => "Teacher updated successfully"];
 
                 } catch (Exception $e) {
-                    $response = [
-                        "status" => "error",
-                        "message" => "Failed to update teacher: " . $e->getMessage()
-                    ];
+                    $response = ["status" => "error", "message" => "Failed to update teacher: " . $e->getMessage()];
                 }
                 break;
 
@@ -594,29 +621,59 @@ try {
                 try {
                     $userId = $_SESSION["user_id"];
 
-                    // Check for duplicate email
+                    // Check email duplication
                     $existingEmail = $mydb->select_one("users", "*", ["email" => $_POST["email"]]);
                     if ($existingEmail && $existingEmail["id"] != $userId) {
-                        $response = [
-                            "status" => "error",
-                            "message" => "Email is already in use."
-                        ];
+                        $response = ["status" => "error", "message" => "Email is already in use."];
                         break;
                     }
 
-                    // Update users table
+                    // ========== HANDLE IMAGE UPLOAD ==========
+                    $uploadDir = "../assets/images/user_image/";
+                    $photoFilename = null;
+
+                    if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] === UPLOAD_ERR_OK) {
+
+                        $old = $mydb->select_one("users", "profile_photo", ["id" => $userId]);
+                        $oldImage = $old ? $old["profile_photo"] : null;
+
+                        $tmp = $_FILES['profile_photo']['tmp_name'];
+                        $ext = pathinfo($_FILES['profile_photo']['name'], PATHINFO_EXTENSION);
+                        $rand = substr(str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"), 0, 6);
+                        $newName = $userId . "-" . $rand . "." . strtolower($ext);
+
+                        if (!is_dir($uploadDir))
+                            mkdir($uploadDir, 0777, true);
+
+                        if (move_uploaded_file($tmp, $uploadDir . $newName)) {
+                            $photoFilename = $newName;
+
+                            if ($oldImage && $oldImage !== "default.png") {
+                                $oldPath = $uploadDir . $oldImage;
+                                if (file_exists($oldPath))
+                                    unlink($oldPath);
+                            }
+                        }
+                    }
+
+                    // Build user data
                     $userData = [
                         "name" => $_POST["fullname"],
                         "address" => $_POST["address"],
                         "birthdate" => $_POST["birthdate"],
                         "gender" => $_POST["gender"],
-                        "email" => $_POST["email"]
+                        "email" => $_POST["email"],
                     ];
 
-                    // Optional password
+                    if ($photoFilename) {
+                        $userData["profile_photo"] = $photoFilename;
+                    }
+
                     if (!empty($_POST["password"])) {
                         $userData["password"] = password_hash($_POST["password"], PASSWORD_DEFAULT);
                     }
+
+                    $mydb->update("users", $userData, ["id" => $userId]);
 
                     // Update students table
                     $studentData = [
@@ -625,23 +682,15 @@ try {
                         "guardian_email" => $_POST["guardian_email"]
                     ];
 
-                    $rowsUpdated = $mydb->update("users", $userData, ["id" => $userId]);
-                    $rowsUpdatedStudent = $mydb->update("students", $studentData, ["student_id" => $userId]);
+                    $mydb->update("students", $studentData, ["student_id" => $userId]);
 
-                    if ($rowsUpdated > 0 || $rowsUpdatedStudent > 0) {
-                        $response = ["status" => "success", "message" => "Student updated successfully"];
-                    } else {
-                        $response = ["status" => "error", "message" => "No changes were made (check IDs and input values)."];
-                    }
-
+                    $response = ["status" => "success", "message" => "Student updated successfully"];
 
                 } catch (Exception $e) {
-                    $response = [
-                        "status" => "error",
-                        "message" => "Failed to update student: " . $e->getMessage()
-                    ];
+                    $response = ["status" => "error", "message" => "Failed to update student: " . $e->getMessage()];
                 }
                 break;
+
 
 
 
@@ -749,6 +798,310 @@ try {
                     ];
                 }
                 break;
+
+
+
+
+
+
+
+
+            /* ---------------- ADD CLASSROOM ---------------- */
+            case "add_classroom":
+                try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== "teacher") {
+                        $response = ["status" => "error", "message" => "Unauthorized request."];
+                        break;
+                    }
+
+                    $teacher_id = $_SESSION['user_id'];
+
+                    $section_name = $_POST['section_name'] ?? '';
+                    $grade_level = $_POST['grade_level'] ?? '';
+                    $subject_name = $_POST['subject_name'] ?? '';
+                    $subject_description = $_POST['subject_description'] ?? '';
+                    $background_color = $_POST['class_color'] ?? '#15285C';
+
+                    // Generate academic year
+                    $year = date("Y");
+                    $academic_year = $year . " - " . ($year + 1);
+
+                    // Status default
+                    $status = "active";
+
+                    // Validate required fields
+                    if (empty($section_name) || empty($grade_level) || empty($subject_name)) {
+                        $response = ["status" => "error", "message" => "Please fill all required fields."];
+                        break;
+                    }
+
+                    // Insert into classroom table
+                    $mydb->insert("classrooms", [
+                        "teacher_id" => $teacher_id,
+                        "section_name" => $section_name,
+                        "grade_level" => $grade_level,
+                        "academic_year" => $academic_year,
+                        "subject_name" => $subject_name,
+                        "subject_description" => $subject_description,
+                        "background_color" => $background_color,
+                        "status" => $status
+                    ]);
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Classroom successfully created."
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to create classroom: " . $e->getMessage()
+                    ];
+                }
+                break;
+
+
+            /* ---------------- UPDATE CLASSROOM ---------------- */
+            case "update_classroom":
+
+                try {
+                    $class_id = $_POST["class_id"] ?? null;
+
+                    if (!$class_id) {
+                        $response = ["status" => "error", "message" => "Missing classroom ID."];
+                        break;
+                    }
+
+                    $updateData = [
+                        "section_name" => $_POST["section_name"],
+                        "grade_level" => $_POST["grade_level"],
+                        "subject_name" => $_POST["subject_name"],
+                        "subject_description" => $_POST["subject_description"],
+                        "background_color" => $_POST["class_color"]
+                    ];
+
+                    $rows = $mydb->update("classrooms", $updateData, ["id" => $class_id]);
+
+                    if ($rows > 0) {
+                        $response = ["status" => "success", "message" => "Classroom updated successfully"];
+                    } else {
+                        $response = ["status" => "error", "message" => "No changes made."];
+                    }
+
+                } catch (Exception $e) {
+                    $response = ["status" => "error", "message" => $e->getMessage()];
+                }
+
+                break;
+
+
+
+            /* ---------------- GET CLASSROOMS ---------------- */
+            case "get_classrooms":
+
+                try {
+                    if (!isset($_SESSION['user_id'])) {
+                        $response = ["success" => false, "message" => "Not logged in"];
+                        break;
+                    }
+
+                    $user_id = $_SESSION['user_id'];
+                    $role = $_SESSION['user_role'];
+
+                    // Receive filters
+                    $status = $_POST["status"] ?? "active";
+                    $search = $_POST["search"] ?? "";
+                    $searchLike = "%" . $search . "%";
+
+                    // ========== TEACHER ==========
+                    if ($role === "teacher") {
+
+                        $sql = "
+                            SELECT c.*, 
+                                u.name AS teacher_name,
+                                u.profile_photo AS teacher_photo,
+                                (
+                                    SELECT COUNT(*) 
+                                    FROM class_members 
+                                    WHERE class_id = c.id AND status = 'joined'
+                                ) AS total_students
+                            FROM classrooms c
+                            LEFT JOIN users u ON u.id = c.teacher_id
+                            WHERE c.teacher_id = ?
+                            AND c.status = ?
+                            AND (
+                                    c.section_name LIKE ?
+                                    OR c.subject_name LIKE ?
+                                    OR c.academic_year LIKE ?
+                                    OR c.grade_level LIKE ?
+                                )
+                            ORDER BY c.created_at DESC
+                        ";
+
+                        $result = $mydb->rawQuery(
+                            $sql,
+                            [$user_id, $status, $searchLike, $searchLike, $searchLike, $searchLike]
+                        );
+                    }
+
+                    // ========== STUDENT ==========
+                    else if ($role === "student") {
+
+                        $sql = "
+                            SELECT c.*, 
+                                u.name AS teacher_name,
+                                u.profile_photo AS teacher_photo,
+                                (
+                                    SELECT COUNT(*) 
+                                    FROM class_members 
+                                    WHERE class_id = c.id AND status = 'joined'
+                                ) AS total_students
+                            FROM class_members cm
+                            INNER JOIN classrooms c ON c.id = cm.class_id
+                            LEFT JOIN users u ON u.id = c.teacher_id
+                            WHERE cm.student_id = ?
+                            AND cm.status = 'joined'
+                            AND c.status = ?
+                            AND (
+                                    c.section_name LIKE ?
+                                    OR c.subject_name LIKE ?
+                                    OR c.academic_year LIKE ?
+                                    OR c.grade_level LIKE ?
+                                )
+                            ORDER BY c.created_at DESC
+                        ";
+
+                        $result = $mydb->rawQuery(
+                            $sql,
+                            [$user_id, $status, $searchLike, $searchLike, $searchLike, $searchLike]
+                        );
+                    }
+
+                    // ========== OTHER ROLES ==========
+                    else {
+                        $result = [];
+                    }
+
+                    $response = [
+                        "success" => true,
+                        "data" => $result
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "success" => false,
+                        "message" => "Failed to load classrooms: " . $e->getMessage()
+                    ];
+                }
+
+                break;
+
+
+
+            /* ---------------- GET SINGLE CLASSROOM ---------------- */
+            case "get_single_classroom":
+
+                try {
+                    $id = $_POST["id"] ?? null;
+
+                    if (!$id) {
+                        $response = ["success" => false, "message" => "Missing classroom ID"];
+                        break;
+                    }
+
+                    $class = $mydb->select_one("classrooms", "*", ["id" => $id]);
+
+                    if (!$class) {
+                        $response = ["success" => false, "message" => "Classroom not found"];
+                        break;
+                    }
+
+                    $response = ["success" => true, "data" => $class];
+
+                } catch (Exception $e) {
+                    $response = ["success" => false, "message" => $e->getMessage()];
+                }
+
+                break;
+
+
+            /* ---------------- ARCHIVING ---------------- */
+            case "archive_classroom":
+
+                try {
+                    $class_id = $_POST["class_id"];
+
+                    $sql = "UPDATE classrooms SET status = 'archived' WHERE id = ?";
+                    $mydb->rawQuery($sql, [$class_id]);
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Class archived successfully"
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => $e->getMessage()
+                    ];
+                }
+
+                break;
+
+
+            /* ---------------- UNARCHIVING ---------------- */
+            case "unarchive_classroom":
+
+                try {
+                    $class_id = $_POST["class_id"];
+
+                    $sql = "UPDATE classrooms SET status = 'active' WHERE id = ?";
+                    $mydb->rawQuery($sql, [$class_id]);
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Class unarchived successfully"
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => $e->getMessage()
+                    ];
+                }
+
+                break;
+
+
+            /* ---------------- DELETE CLASSROOM ---------------- */
+            case "delete_classroom":
+
+                try {
+                    $class_id = $_POST["class_id"];
+
+                    // Use the myDB delete function
+                    $mydb->delete("classrooms", ["id" => $class_id]);
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Classroom deleted successfully"
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => $e->getMessage()
+                    ];
+                }
+
+                break;
+
+
+
+
+
+
 
 
 
