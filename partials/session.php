@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // If not logged in → redirect to login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../index.php?ERROR=1");
+    header("Location: index.php");
     exit;
 }
 
@@ -20,7 +20,7 @@ $user = $mydb->select_one("users", "*", ["id" => $_SESSION['user_id']]);
 if (!$user) {
     session_unset();
     session_destroy();
-    header("Location: ../index.php?ERROR=2");
+    header("Location: index.php");
     exit;
 }
 

@@ -22,3 +22,7 @@ Stack trace:
 [11-Dec-2025 23:19:12 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 570
 [11-Dec-2025 23:19:50 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 570
 [11-Dec-2025 23:20:52 Asia/Manila] PHP Warning:  Undefined array key "auth_id" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 570
+[12-Dec-2025 13:51:38 Asia/Manila] PHP Warning:  Undefined array key "quarter_name" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 314
+[12-Dec-2025 13:51:38 Asia/Manila] PHP Warning:  Undefined array key "quarter_name" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 314
+[12-Dec-2025 13:51:38 Asia/Manila] PHP Warning:  Undefined array key "quarter_name" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 314
+[12-Dec-2025 13:51:38 Asia/Manila] PHP Warning:  Undefined array key "quarter_name" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 314

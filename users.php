@@ -1,6 +1,8 @@
 <?php
 require "db/db.php";
 $mydb = new myDB();
+
+include_once 'partials/session.php'
 ?>
 
 <!DOCTYPE html>

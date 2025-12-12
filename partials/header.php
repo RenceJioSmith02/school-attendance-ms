@@ -15,7 +15,9 @@
         &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
         <a class="link" href="report.php">Report</a>
         &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-        <a class="link" href="profile.php">Profile</a>
+        <a class="link" href="profile.php"><?php echo (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')
+            ? 'Settings'
+            : 'Profile'; ?></a>
     </div>
 
     <!-- Desktop Logout Button -->
@@ -36,7 +38,9 @@
     <a class="link" href="users.php">Users</a>
     <a class="link" href="class.php">Class</a>
     <a class="link" href="report.php">Report</a>
-    <a class="link" href="profile.php">Profile</a>
+    <a class="link" href="profile.php"><?php echo (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')
+        ? 'Settings'
+        : 'Profile'; ?></a>
 
     <button class="btn-secondary" style="margin-top:20px;">Logout</button>
 

@@ -252,7 +252,7 @@ try {
                     $user_id = $_SESSION['user_id'];
                     $role = $_SESSION['user_role'];
 
-                    // Get main user record
+                    // Main user record
                     $user = $mydb->select_one("users", "*", ["id" => $user_id]);
 
                     if (!$user) {
@@ -263,7 +263,7 @@ try {
                         break;
                     }
 
-                    // Base data for all roles
+                    // Base data
                     $data = [
                         "fullname" => $user["name"],
                         "email" => $user["email"],
@@ -271,6 +271,7 @@ try {
                         "address" => $user["address"],
                         "gender" => $user["gender"],
                         "birthdate" => $user["birthdate"],
+                        "is_registered" => $user["is_registered"],
                     ];
 
                     // Teacher info
@@ -295,6 +296,30 @@ try {
                             $data["guardian_contact"] = $student["guardian_contact"];
                             $data["guardian_email"] = $student["guardian_email"];
                         }
+                    }
+
+                    // Admin: Load Quarters
+                    if ($role === "admin") {
+
+                        $quarters = $mydb->select("quarter");
+
+                        // Always prepare 4 rows
+                        $formatted = [
+                            ["quarter_name" => "", "start_date" => "", "end_date" => ""],
+                            ["quarter_name" => "", "start_date" => "", "end_date" => ""],
+                            ["quarter_name" => "", "start_date" => "", "end_date" => ""],
+                            ["quarter_name" => "", "start_date" => "", "end_date" => ""],
+                        ];
+
+                        for ($i = 0; $i < count($quarters) && $i < 4; $i++) {
+                            $formatted[$i] = [
+                                "quarter_name" => $quarters[$i]["quarter_name"],
+                                "start_date" => $quarters[$i]["start_date"],
+                                "end_date" => $quarters[$i]["end_date"],
+                            ];
+                        }
+
+                        $data["quarters"] = $formatted;
                     }
 
                     $response = [
@@ -648,6 +673,82 @@ try {
                 break;
 
 
+
+            /* ---------------- UPDATE QUARTERS ---------------- */
+            case "update_quarters":
+                try {
+
+                    // Build array of 4 quarters from POST
+                    $quarters = [];
+                    for ($i = 0; $i < 4; $i++) {
+                        $quarters[] = [
+                            "quarter_name" => $_POST["quarter_name"][$i],
+                            "start_date" => $_POST["start_date"][$i],
+                            "end_date" => $_POST["end_date"][$i],
+                        ];
+                    }
+
+                    // Fetch existing quarters
+                    $existing = $mydb->select("quarter");
+
+                    // If no quarters exist → INSERT 4 rows
+                    if (count($existing) == 0) {
+
+                        foreach ($quarters as $q) {
+                            $mydb->insert("quarter", $q);
+                        }
+
+                    } else {
+
+                        // UPDATE existing rows
+                        for ($i = 0; $i < count($existing); $i++) {
+                            $mydb->update("quarter", $quarters[$i], ["id" => $existing[$i]["id"]]);
+                        }
+
+                        // INSERT missing rows if less than 4
+                        if (count($existing) < 4) {
+                            for ($i = count($existing); $i < 4; $i++) {
+                                $mydb->insert("quarter", $quarters[$i]);
+                            }
+                        }
+                    }
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Quarter settings updated"
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to update quarters: " . $e->getMessage()
+                    ];
+                }
+                break;
+
+
+            /* ---------------- UPDATE ADMIN PASSWORD ---------------- */
+            case "update_admin_password":
+                try {
+                    $userId = $_SESSION["user_id"];
+                    $newPass = password_hash($_POST["password"], PASSWORD_DEFAULT);
+
+                    $mydb->update("users", [
+                        "password" => $newPass
+                    ], ["id" => $userId]);
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Password updated"
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => "Failed to update admin password: " . $e->getMessage()
+                    ];
+                }
+                break;
 
 
 

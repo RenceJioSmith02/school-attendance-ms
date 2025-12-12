@@ -77,6 +77,16 @@ $("#showUpdateTeacherForm").on("click", function (e) {
   showModal("update-teacher");
 });
 
+$("#showUpdateQuarterForm").on("click", function (e) {
+  e.preventDefault();
+  showModal("update-quarter");
+});
+
+$("#showUpdatePasswordForm").on("click", function (e) {
+  e.preventDefault();
+  showModal("update-admin-password");
+});
+
 $("#overlay").on("click", hideModals);
 
 
