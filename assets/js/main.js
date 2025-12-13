@@ -87,6 +87,11 @@ $("#showUpdatePasswordForm").on("click", function (e) {
   showModal("update-admin-password");
 });
 
+$("#showInviteStudentForm").on("click", function (e) {
+  e.preventDefault();
+  showModal("invite-student");
+});
+
 
 
 $("#overlay").on("click", hideModals);

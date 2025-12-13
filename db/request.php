@@ -92,7 +92,8 @@ try {
                 break;
 
 
-            /* ---------------- GET TEACHERS FOR TABLE ---------------- */
+
+
             case "getTeachers":
                 try {
                     $search = $_POST["search"] ?? '';
@@ -100,23 +101,41 @@ try {
                     $limit = 10;
                     $offset = ($page - 1) * $limit;
 
-                    // Sorting
                     $sortColumn = $_POST['sortColumn'] ?? 'id';
                     $sortOrder = $_POST['sortOrder'] ?? 'DESC';
                     $allowedSortColumns = ['name', 'department', 'age', 'id'];
-                    if (!in_array($sortColumn, $allowedSortColumns))
-                        $sortColumn = 'id';
+                    if (!in_array($sortColumn, $allowedSortColumns)) $sortColumn = 'id';
                     $sortOrder = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
 
-                    // Department filter
-                    $whereClauses = ["users.name LIKE ?"];
-                    $params = ["%$search%"];
+                    $searchTerm = "%$search%";
+
+                    $whereClauses = [
+                        "(
+                            users.name LIKE ?
+                            OR teachers.department LIKE ?
+                            OR users.age LIKE ?
+                            OR users.gender LIKE ?
+                            OR users.address LIKE ?
+                            OR users.email LIKE ?
+                            OR users.is_registered LIKE ?
+                        )"
+                    ];
+
+                    $params = [
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm
+                    ];
+
                     if (!empty($_POST['department'])) {
                         $whereClauses[] = "teachers.department = ?";
                         $params[] = $_POST['department'];
                     }
 
-                    // Registered filter
                     if (isset($_POST['registered']) && $_POST['registered'] !== '') {
                         $whereClauses[] = "users.is_registered = ?";
                         $params[] = $_POST['registered'];
@@ -124,31 +143,33 @@ try {
 
                     $whereSQL = implode(" AND ", $whereClauses);
 
-                    // Total rows
-                    $countSql = "SELECT COUNT(*) AS total 
-                     FROM users 
-                     INNER JOIN teachers ON teachers.teacher_id = users.id 
-                     WHERE $whereSQL";
-                    $countData = $mydb->rawQuery($countSql, $params);
-                    $total = $countData[0]['total'];
+                    $countSql = "
+                        SELECT COUNT(*) AS total
+                        FROM users
+                        INNER JOIN teachers ON teachers.teacher_id = users.id
+                        WHERE $whereSQL
+                    ";
 
-                    // Fetch paginated rows
-                    $sql = "SELECT 
-                        users.id AS user_id,
-                        users.name,
-                        users.profile_photo,
-                        teachers.department,
-                        users.age,
-                        users.gender,
-                        users.birthdate,
-                        users.address,
-                        users.email,
-                        users.is_registered
-                    FROM users
-                    INNER JOIN teachers ON teachers.teacher_id = users.id
-                    WHERE $whereSQL
-                    ORDER BY $sortColumn $sortOrder
-                    LIMIT $limit OFFSET $offset";
+                    $total = $mydb->rawQuery($countSql, $params)[0]['total'];
+
+                    $sql = "
+                        SELECT
+                            users.id AS user_id,
+                            users.name,
+                            users.profile_photo,
+                            teachers.department,
+                            users.age,
+                            users.gender,
+                            users.birthdate,
+                            users.address,
+                            users.email,
+                            users.is_registered
+                        FROM users
+                        INNER JOIN teachers ON teachers.teacher_id = users.id
+                        WHERE $whereSQL
+                        ORDER BY $sortColumn $sortOrder
+                        LIMIT $limit OFFSET $offset
+                    ";
 
                     $data = $mydb->rawQuery($sql, $params);
 
@@ -169,7 +190,6 @@ try {
                 break;
 
 
-            /* ---------------- GET STUDENTS FOR TABLE ---------------- */
             case "getStudents":
                 try {
                     $search = $_POST["search"] ?? '';
@@ -177,19 +197,40 @@ try {
                     $limit = 10;
                     $offset = ($page - 1) * $limit;
 
-                    // Sorting
                     $sortColumn = $_POST['sortColumn'] ?? 'id';
                     $sortOrder = $_POST['sortOrder'] ?? 'DESC';
                     $allowedSortColumns = ['name', 'lrn', 'age', 'id'];
-                    if (!in_array($sortColumn, $allowedSortColumns))
-                        $sortColumn = 'id';
+                    if (!in_array($sortColumn, $allowedSortColumns)) $sortColumn = 'id';
                     $sortOrder = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
 
-                    // Search filter (no department for students)
-                    $whereClauses = ["users.name LIKE ?"];
-                    $params = ["%$search%"];
+                    $searchTerm = "%$search%";
 
-                    // Registered filter
+                    $whereClauses = [
+                        "(
+                            users.name LIKE ?
+                            OR students.lrn LIKE ?
+                            OR users.age LIKE ?
+                            OR users.gender LIKE ?
+                            OR users.address LIKE ?
+                            OR users.email LIKE ?
+                            OR students.guardian_email LIKE ?
+                            OR students.guardian_contact LIKE ?
+                            OR users.is_registered LIKE ?
+                        )"
+                    ];
+
+                    $params = [
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm
+                    ];
+
                     if (isset($_POST['registered']) && $_POST['registered'] !== '') {
                         $whereClauses[] = "users.is_registered = ?";
                         $params[] = $_POST['registered'];
@@ -197,33 +238,35 @@ try {
 
                     $whereSQL = implode(" AND ", $whereClauses);
 
-                    // Total rows
-                    $countSql = "SELECT COUNT(*) AS total 
-                     FROM users 
-                     INNER JOIN students ON students.student_id = users.id 
-                     WHERE $whereSQL";
-                    $countData = $mydb->rawQuery($countSql, $params);
-                    $total = $countData[0]['total'];
+                    $countSql = "
+                        SELECT COUNT(*) AS total
+                        FROM users
+                        INNER JOIN students ON students.student_id = users.id
+                        WHERE $whereSQL
+                    ";
 
-                    // Fetch paginated rows
-                    $sql = "SELECT 
-                        users.id AS user_id,
-                        users.name,
-                        users.profile_photo,
-                        students.lrn,
-                        users.age,
-                        users.gender,
-                        users.birthdate,
-                        users.address,
-                        users.email,
-                        students.guardian_email,
-                        students.guardian_contact,
-                        users.is_registered
-                    FROM users
-                    INNER JOIN students ON students.student_id = users.id
-                    WHERE $whereSQL
-                    ORDER BY $sortColumn $sortOrder
-                    LIMIT $limit OFFSET $offset";
+                    $total = $mydb->rawQuery($countSql, $params)[0]['total'];
+
+                    $sql = "
+                        SELECT
+                            users.id AS user_id,
+                            users.name,
+                            users.profile_photo,
+                            students.lrn,
+                            users.age,
+                            users.gender,
+                            users.birthdate,
+                            users.address,
+                            users.email,
+                            students.guardian_email,
+                            students.guardian_contact,
+                            users.is_registered
+                        FROM users
+                        INNER JOIN students ON students.student_id = users.id
+                        WHERE $whereSQL
+                        ORDER BY $sortColumn $sortOrder
+                        LIMIT $limit OFFSET $offset
+                    ";
 
                     $data = $mydb->rawQuery($sql, $params);
 
@@ -242,6 +285,160 @@ try {
                     ];
                 }
                 break;
+
+
+            
+
+            // /* ---------------- GET TEACHERS FOR TABLE ---------------- */
+            // case "getTeachers":
+            //     try {
+            //         $search = $_POST["search"] ?? '';
+            //         $page = intval($_POST["page"] ?? 1);
+            //         $limit = 10;
+            //         $offset = ($page - 1) * $limit;
+
+            //         // Sorting
+            //         $sortColumn = $_POST['sortColumn'] ?? 'id';
+            //         $sortOrder = $_POST['sortOrder'] ?? 'DESC';
+            //         $allowedSortColumns = ['name', 'department', 'age', 'id'];
+            //         if (!in_array($sortColumn, $allowedSortColumns))
+            //             $sortColumn = 'id';
+            //         $sortOrder = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
+
+            //         // Department filter
+            //         $whereClauses = ["users.name LIKE ?"];
+            //         $params = ["%$search%"];
+            //         if (!empty($_POST['department'])) {
+            //             $whereClauses[] = "teachers.department = ?";
+            //             $params[] = $_POST['department'];
+            //         }
+
+            //         // Registered filter
+            //         if (isset($_POST['registered']) && $_POST['registered'] !== '') {
+            //             $whereClauses[] = "users.is_registered = ?";
+            //             $params[] = $_POST['registered'];
+            //         }
+
+            //         $whereSQL = implode(" AND ", $whereClauses);
+
+            //         // Total rows
+            //         $countSql = "SELECT COUNT(*) AS total 
+            //          FROM users 
+            //          INNER JOIN teachers ON teachers.teacher_id = users.id 
+            //          WHERE $whereSQL";
+            //         $countData = $mydb->rawQuery($countSql, $params);
+            //         $total = $countData[0]['total'];
+
+            //         // Fetch paginated rows
+            //         $sql = "SELECT 
+            //             users.id AS user_id,
+            //             users.name,
+            //             users.profile_photo,
+            //             teachers.department,
+            //             users.age,
+            //             users.gender,
+            //             users.birthdate,
+            //             users.address,
+            //             users.email,
+            //             users.is_registered
+            //         FROM users
+            //         INNER JOIN teachers ON teachers.teacher_id = users.id
+            //         WHERE $whereSQL
+            //         ORDER BY $sortColumn $sortOrder
+            //         LIMIT $limit OFFSET $offset";
+
+            //         $data = $mydb->rawQuery($sql, $params);
+
+            //         $response = [
+            //             "status" => "success",
+            //             "data" => $data,
+            //             "total" => $total,
+            //             "limit" => $limit,
+            //             "page" => $page
+            //         ];
+
+            //     } catch (Exception $e) {
+            //         $response = [
+            //             "status" => "error",
+            //             "message" => "Failed to fetch teachers: " . $e->getMessage()
+            //         ];
+            //     }
+            //     break;
+
+
+            // /* ---------------- GET STUDENTS FOR TABLE ---------------- */
+            // case "getStudents":
+            //     try {
+            //         $search = $_POST["search"] ?? '';
+            //         $page = intval($_POST["page"] ?? 1);
+            //         $limit = 10;
+            //         $offset = ($page - 1) * $limit;
+
+            //         // Sorting
+            //         $sortColumn = $_POST['sortColumn'] ?? 'id';
+            //         $sortOrder = $_POST['sortOrder'] ?? 'DESC';
+            //         $allowedSortColumns = ['name', 'lrn', 'age', 'id'];
+            //         if (!in_array($sortColumn, $allowedSortColumns))
+            //             $sortColumn = 'id';
+            //         $sortOrder = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
+
+            //         // Search filter (no department for students)
+            //         $whereClauses = ["users.name LIKE ?"];
+            //         $params = ["%$search%"];
+
+            //         // Registered filter
+            //         if (isset($_POST['registered']) && $_POST['registered'] !== '') {
+            //             $whereClauses[] = "users.is_registered = ?";
+            //             $params[] = $_POST['registered'];
+            //         }
+
+            //         $whereSQL = implode(" AND ", $whereClauses);
+
+            //         // Total rows
+            //         $countSql = "SELECT COUNT(*) AS total 
+            //          FROM users 
+            //          INNER JOIN students ON students.student_id = users.id 
+            //          WHERE $whereSQL";
+            //         $countData = $mydb->rawQuery($countSql, $params);
+            //         $total = $countData[0]['total'];
+
+            //         // Fetch paginated rows
+            //         $sql = "SELECT 
+            //             users.id AS user_id,
+            //             users.name,
+            //             users.profile_photo,
+            //             students.lrn,
+            //             users.age,
+            //             users.gender,
+            //             users.birthdate,
+            //             users.address,
+            //             users.email,
+            //             students.guardian_email,
+            //             students.guardian_contact,
+            //             users.is_registered
+            //         FROM users
+            //         INNER JOIN students ON students.student_id = users.id
+            //         WHERE $whereSQL
+            //         ORDER BY $sortColumn $sortOrder
+            //         LIMIT $limit OFFSET $offset";
+
+            //         $data = $mydb->rawQuery($sql, $params);
+
+            //         $response = [
+            //             "status" => "success",
+            //             "data" => $data,
+            //             "total" => $total,
+            //             "limit" => $limit,
+            //             "page" => $page
+            //         ];
+
+            //     } catch (Exception $e) {
+            //         $response = [
+            //             "status" => "error",
+            //             "message" => "Failed to fetch students: " . $e->getMessage()
+            //         ];
+            //     }
+            //     break;
 
 
             /* ---------------- GET USER INFO ---------------- */
@@ -802,10 +999,6 @@ try {
 
 
 
-
-
-
-
             /* ---------------- ADD CLASSROOM ---------------- */
             case "add_classroom":
                 try {
@@ -1097,6 +1290,174 @@ try {
 
                 break;
 
+
+            /* ---------------- GET CLASS MEMBERS ---------------- */
+            case "getClassMembers":
+                try {
+                    $class_id = $_POST['class_id'];
+                    $search = $_POST['search'] ?? '';
+                    $page = intval($_POST['page'] ?? 1);
+                    $limit = 10;
+                    $offset = ($page - 1) * $limit;
+
+                    $searchTerm = "%$search%";
+
+                    $where = "
+                        cm.class_id = ?
+                        AND (
+                            u.name LIKE ?
+                            OR s.lrn LIKE ?
+                            OR u.email LIKE ?
+                            OR u.gender LIKE ?
+                            OR u.address LIKE ?
+                            OR s.guardian_email LIKE ?
+                            OR s.guardian_contact LIKE ?
+                            OR cm.status LIKE ?
+                        )
+                    ";
+
+                    $params = [
+                        $class_id,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm
+                    ];
+
+                    $countSql = "
+                        SELECT COUNT(*) AS total
+                        FROM class_members cm
+                        INNER JOIN students s ON s.student_id = cm.student_id
+                        INNER JOIN users u ON u.id = s.student_id
+                        WHERE $where
+                    ";
+
+                    $total = $mydb->rawQuery($countSql, $params)[0]['total'];
+
+                    $sql = "
+                        SELECT
+                            u.id AS student_id,
+                            u.name,
+                            u.profile_photo,
+                            s.lrn,
+                            u.age,
+                            u.gender,
+                            u.birthdate,
+                            u.address,
+                            u.email,
+                            s.guardian_email,
+                            s.guardian_contact,
+                            cm.status
+                        FROM class_members cm
+                        INNER JOIN students s ON s.student_id = cm.student_id
+                        INNER JOIN users u ON u.id = s.student_id
+                        WHERE $where
+                        ORDER BY u.name ASC
+                        LIMIT $limit OFFSET $offset
+                    ";
+
+                    $data = $mydb->rawQuery($sql, $params);
+
+                    $response = [
+                        "status" => "success",
+                        "data" => $data,
+                        "total" => $total,
+                        "limit" => $limit,
+                        "page" => $page
+                    ];
+                } catch (Exception $e) {
+                    $response = ["status" => "error", "message" => $e->getMessage()];
+                }
+                break;
+
+
+
+
+            /* ---------------- GET INVITABLE STUDENTS ---------------- */
+            case "getInvitableStudents":
+                try {
+                    $class_id = $_POST['class_id'];
+                    $search = $_POST['search'] ?? '';
+                    $page = intval($_POST['page'] ?? 1);
+                    $limit = 10;
+                    $offset = ($page - 1) * $limit;
+
+                    $searchTerm = "%$search%";
+
+                    $sql = "
+                        SELECT
+                            u.id AS student_id,
+                            u.name,
+                            u.profile_photo,
+                            s.lrn,
+                            u.age,
+                            u.gender,
+                            u.birthdate,
+                            u.address,
+                            u.email
+                        FROM students s
+                        INNER JOIN users u ON u.id = s.student_id
+                        WHERE u.is_registered = 1
+                        AND (
+                            u.name LIKE ?
+                            OR s.lrn LIKE ?
+                            OR u.email LIKE ?
+                            OR u.gender LIKE ?
+                            OR u.address LIKE ?
+                        )
+                        AND u.id NOT IN (
+                            SELECT student_id FROM class_members WHERE class_id = ?
+                        )
+                        ORDER BY u.name ASC
+                        LIMIT $limit OFFSET $offset
+                    ";
+
+                    $params = [
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm,
+                        $class_id
+                    ];
+
+                    $data = $mydb->rawQuery($sql, $params);
+
+                    $response = [
+                        "status" => "success",
+                        "data" => $data
+                    ];
+                } catch (Exception $e) {
+                    $response = ["status" => "error", "message" => $e->getMessage()];
+                }
+                break;
+
+
+
+            /* ---------------- INVITE STUDENT TO CLASS ---------------- */
+            case "inviteStudentToClass":
+                try {
+                    $class_id = $_POST['class_id'];
+                    $student_id = $_POST['student_id'];
+
+                    $mydb->insert("class_members", [
+                        "class_id" => $class_id,
+                        "student_id" => $student_id,
+                        "status" => "joined"
+                    ]);
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Student successfully added to class"
+                    ];
+                } catch (Exception $e) {
+                    $response = ["status" => "error", "message" => $e->getMessage()];
+                }
+                break;
 
 
 
