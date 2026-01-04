@@ -214,6 +214,10 @@ a {
     overflow: auto;
 }
 
+.hidden {
+    display: none !important;
+}
+
 
 /* =========================
    Header
@@ -765,6 +769,17 @@ th.expanded {
     font-size: var(--font-size-md);
     transition: all 0.25s ease;
 }
+
+input[type="date"] {
+    padding: 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-light);
+    background-color: var(--white-pure);
+    color: var(--black-soft);
+    font-size: var(--font-size-md);
+    transition: all 0.25s ease;
+}
+
 
 .form-container input[type="color"] {
     width: 100%;

@@ -85,11 +85,33 @@ include_once 'partials/session.php'
 
 
 
+    <!-- Attendance Reason Modal -->
+    <div class="form-container modal scroller-format" id="attendance-reason-modal" style="max-width: 500px;">
+        <div class="header flex jus-center al-center flex-col">
+            <h2 id="attendanceReasonTitle">Reason</h2>
+            <span class="close-btn" onclick="hideModals()">&times;</span>
+        </div>
+
+        <div class="content p20">
+            <textarea id="attendanceReasonText" placeholder="Enter reason..."
+                style="width:100%; min-height:120px;"></textarea>
+
+            <input type="hidden" id="attendanceStudentId">
+            <input type="hidden" id="attendanceStatus">
+
+            <div class="flex jus-end gap-10 mt20">
+                <button class="btn-secondary" onclick="hideModals()">Cancel</button>
+                <button class="btn-primary" id="saveAttendanceReason">Save</button>
+            </div>
+        </div>
+    </div>
+
+
+
     <div class="container flex flex-col jus-start ">
 
         <!-- Header -->
         <?php include 'partials/header.php'; ?>
-
 
         <div class="content dashboard">
             <div class="top-controls flex jus-between al-center pt10 pb10">
@@ -102,9 +124,13 @@ include_once 'partials/session.php'
                     <select id="filterShowbuttons" class="btn-primary custom-filter" style="max-width: 150px;">
                         <option class="text-left" value="attendance">Attendance</option>
                         <option class="text-left" value="user_management">User Management</option>
+                        <option class="text-left" value="report">Report</option>
                     </select>
 
-                    <button class="btn-primary" style="max-width: 150px;" id="showInviteStudentForm">+ Invite Student</button>
+                    <button class="btn-primary" style="max-width: 150px;" id="showInviteStudentForm">+ Invite
+                        Student</button>
+
+                    <input type="date" name="attendanceDate" id="attendanceDate">
 
                     <select id="filterQuarter" class="btn-primary custom-filter" style="max-width: 150px;">
                         <option class="text-left" value="First Quarter">First Quarter</option>
@@ -137,7 +163,7 @@ include_once 'partials/session.php'
                                 <th>Guardian Email</th>
                                 <th>Guardian Contact</th>
                                 <th>Status</th>
-                                <th>Action</th>
+                                <th class="last-column">Action</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody"></tbody>
@@ -170,31 +196,63 @@ include_once 'partials/session.php'
             // --------------------- STATE ---------------------
             let classId = new URLSearchParams(window.location.search).get("id");
             let currentPage = 1;
+            let currentMode = "attendance"; // default
 
             // --------------------- INIT ---------------------
             loadClassMembers();
-            loadInvitableStudents();
+            applyModeUI();
+
+            if (currentMode === "user_management") {
+                loadInvitableStudents();
+            }
+
 
             // --------------------- FUNCTIONS ---------------------
+            function getTodayPH() {
+                const now = new Date();
+                const phTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+                return phTime.toISOString().split("T")[0];
+            }
+
+            $("#attendanceDate").val(getTodayPH());
+
+
 
             function loadClassMembers() {
-                $.ajax({
-                    url: "db/request.php",
-                    type: "POST",
-                    data: {
-                        action: "getClassMembers",
-                        class_id: classId,
-                        search: $("#classMember_searchInput").val(),
-                        page: currentPage
-                    },
-                    dataType: "json",
-                    success: function (res) {
-                        if (res.status === "success") {
-                            renderClassMembers(res.data);
-                        }
+
+                if (currentMode === "attendance") {
+                    action = "getClassMembersAttendance";
+                } else if (currentMode === "user_management") {
+                    action = "getClassMembers";
+                } else {
+                    loadAttendanceReport();
+                    return;
+                }
+
+                $.post("db/request.php", {
+                    action: action,
+                    class_id: classId,
+                    attendance_date: $("#attendanceDate").val(),
+                    search: $("#classMember_searchInput").val()
+                }, function (res) {
+                    if (res.status === "success") {
+                        renderClassMembers(res.data);
                     }
-                });
+                }, "json");
             }
+
+
+
+
+            $("#attendanceDate").on("change", function () {
+                if (currentMode === "attendance") loadClassMembers();
+            });
+
+            $("#filterQuarter").on("change", function () {
+                if (currentMode === "report") loadClassMembers();
+            });
+
+
 
             function renderClassMembers(data) {
                 let rows = "";
@@ -218,11 +276,15 @@ include_once 'partials/session.php'
                         <td>${s.guardian_email}</td>
                         <td>${s.guardian_contact}</td>
                         <td>
-                            <span class="badge ${s.status}">
-                                ${s.status}
-                            </span>
+                            ${s.attendance_status
+                            ? `<span class="badge ${s.attendance_status}" 
+                                    title="${s.reason ?? ''}">
+                                    ${s.attendance_status}
+                                </span>`
+                            : `<span class="badge pending">Not Set</span>`
+                        }
                         </td>
-                        <td>
+                        <td class="last-column">
                             <button class="btn-delete remove-student"
                                     data-id="${s.student_id}">
                                 Remove
@@ -251,13 +313,71 @@ include_once 'partials/session.php'
                 });
 
                 $("#class_members_table tbody").html(rows);
+                applyModeUI();
             }
 
 
             $("#classMember_searchInput").on("input", function () {
                 currentPage = 1;
-                loadClassMembers();
+                if (currentMode === "report") {
+                    loadAttendanceReport();
+                } else {
+                    loadClassMembers();
+                }
             });
+
+
+
+            function loadAttendanceReport() {
+                $.post("db/request.php", {
+                    action: "getAttendanceReport",
+                    class_id: classId,
+                    quarter: $("#filterQuarter").val(),
+                    search: $("#classMember_searchInput").val()
+                }, function (res) {
+                    if (res.status === "success") {
+                        renderReportTable(res.data);
+                    }
+                }, "json");
+            }
+
+
+
+            function renderReportTable(data) {
+                let rows = "";
+                let count = 1;
+
+                data.forEach(s => {
+                    rows += `
+                    <tr>
+                        <td>${count++}</td>
+                        <td>${s.name}</td>
+                        <td><img src="assets/images/user_image/${s.profile_photo || 'default.png'}" width="40"></td>
+                        <td>${s.lrn}</td>
+                        <td>${s.email}</td>
+                        <td>${s.total_present || 0}</td>
+                        <td>${s.total_late || 0}</td>
+                        <td>${s.total_absent || 0}</td>
+                        <td>${s.total_excuse || 0}</td>
+                    </tr>
+                    `;
+                });
+
+                $("#class_members_table tbody").html(rows);
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -359,6 +479,161 @@ include_once 'partials/session.php'
             });
 
 
+            function applyModeUI() {
+
+                if (currentMode === "attendance") {
+
+                    $("#class_members_table thead").html(`
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Photo</th>
+                <th>LRN</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Birthdate</th>
+                <th>Address</th>
+                <th>Email</th>
+                <th>Guardian Email</th>
+                <th>Guardian Contact</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        `);
+
+                    $("#attendanceDate").removeClass("hidden");
+                    $("#showInviteStudentForm").addClass("hidden");
+                    $("#filterQuarter").addClass("hidden");
+                    $("#downloadReport").addClass("hidden");
+                    $(".remove-student").addClass("hidden");
+                    $(".attendance-buttons").removeClass("hidden");
+
+                }
+                else if (currentMode === "report") {
+
+                    $("#class_members_table thead").html(`
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Photo</th>
+                <th>LRN</th>
+                <th>Email</th>
+                <th>P</th>
+                <th>L</th>
+                <th>A</th>
+                <th>E</th>
+            </tr>
+        `);
+
+                    $("#attendanceDate").addClass("hidden");
+                    $("#showInviteStudentForm").addClass("hidden");
+                    $("#filterQuarter").removeClass("hidden");
+                    $("#downloadReport").removeClass("hidden");
+
+                }
+                else if (currentMode === "user_management") {
+
+                    $("#class_members_table thead").html(`
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Photo</th>
+                <th>LRN</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Birthdate</th>
+                <th>Address</th>
+                <th>Email</th>
+                <th>Guardian Email</th>
+                <th>Guardian Contact</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        `);
+
+                    $("#attendanceDate").addClass("hidden");
+                    $("#showInviteStudentForm").removeClass("hidden");
+                    $("#filterQuarter").addClass("hidden");
+                    $("#downloadReport").addClass("hidden");
+                    $(".remove-student").removeClass("hidden");
+                    $(".attendance-buttons").addClass("hidden");
+                }
+            }
+
+
+
+            $("#filterShowbuttons").on("change", function () {
+                currentMode = $(this).val();
+                currentPage = 1;
+                applyModeUI();
+                loadClassMembers(); // ✅ ADD THIS
+            });
+
+
+
+
+
+
+            // --------------------- MARKING STUDENT ATTENDANCE ---------------------
+
+            $(document).on("click", ".present-student, .late-student", function () {
+                if (currentMode !== "attendance") return;
+
+                const studentId = $(this).data("id");
+                const status = $(this).hasClass("present-student") ? "present" : "late";
+
+                saveAttendance(studentId, status, null);
+            });
+
+            $(document).on("click", ".absent-student, .excuse-student", function () {
+                if (currentMode !== "attendance") return;
+
+                const studentId = $(this).data("id");
+                const status = $(this).hasClass("absent-student") ? "absent" : "excuse";
+
+                $("#attendanceStudentId").val(studentId);
+                $("#attendanceStatus").val(status);
+                $("#attendanceReasonText").val("");
+
+                $("#attendanceReasonTitle").text(
+                    status === "absent" ? "Reason for Absence" : "Reason for Excuse"
+                );
+
+                showModal("attendance-reason-modal");
+            });
+
+
+            $("#saveAttendanceReason").on("click", function () {
+                const studentId = $("#attendanceStudentId").val();
+                const status = $("#attendanceStatus").val();
+                const reason = $("#attendanceReasonText").val().trim();
+
+                if (!reason) {
+                    Swal.fire("Required", "Please enter a reason.", "warning");
+                    return;
+                }
+
+                saveAttendance(studentId, status, reason);
+                hideModals();
+            });
+
+
+            function saveAttendance(studentId, status, reason) {
+                $.post("db/request.php", {
+                    action: "saveAttendance",
+                    class_id: classId,
+                    student_id: studentId,
+                    date: $("#attendanceDate").val(),
+                    status: status,
+                    reason: reason
+                }, function (res) {
+                    if (res.status === "success") {
+                        loadClassMembers();
+                    } else {
+                        Swal.fire("Error", res.message, "error");
+                    }
+                }, "json");
+            }
 
 
 
@@ -370,7 +645,33 @@ include_once 'partials/session.php'
 
 
 
+        });
 
+
+        document.addEventListener("click", function (e) {
+
+            // Check if click happened inside ANY table
+            const cell = e.target.closest("td, th");
+            if (!cell) return;
+
+            const table = cell.closest("table");
+            if (!table) return;
+
+            // Ignore action column (last column)
+            const row = cell.parentNode;
+            if (!row || !row.cells) return;
+
+            const lastIndex = row.cells.length - 1;
+            if (cell.cellIndex === lastIndex) return;
+
+            // Collapse previously expanded cell (global)
+            const expanded = document.querySelector("td.expanded, th.expanded");
+            if (expanded && expanded !== cell) {
+                expanded.classList.remove("expanded");
+            }
+
+            // Toggle expansion
+            cell.classList.toggle("expanded");
         });
 
     </script>

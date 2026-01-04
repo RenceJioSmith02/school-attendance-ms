@@ -99,29 +99,28 @@ $("#overlay").on("click", hideModals);
 
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  const table = document.querySelector("table");
-  let expandedCell = null; // store currently expanded cell
+document.addEventListener("click", function (e) {
 
-  table.addEventListener("click", (e) => {
-    // Find the closest td or th
-    let cell = e.target.closest("td, th");
+  // Check if click happened inside ANY table
+  const cell = e.target.closest("td, th");
+  if (!cell) return;
 
-    if (!cell) return;
+  const table = cell.closest("table");
+  if (!table) return;
 
-    // Ignore last column (actions)
-    const lastIndex = cell.parentNode.cells.length - 1;
-    if (cell.cellIndex === lastIndex) return;
+  // Ignore action column (last column)
+  const row = cell.parentNode;
+  if (!row || !row.cells) return;
 
-    // Collapse previously expanded cell if different
-    if (expandedCell && expandedCell !== cell) {
-      expandedCell.classList.remove("expanded");
-    }
+  const lastIndex = row.cells.length - 1;
+  if (cell.cellIndex === lastIndex) return;
 
-    // Toggle the clicked cell
-    cell.classList.toggle("expanded");
+  // Collapse previously expanded cell (global)
+  const expanded = document.querySelector("td.expanded, th.expanded");
+  if (expanded && expanded !== cell) {
+    expanded.classList.remove("expanded");
+  }
 
-    // Store it if expanded, otherwise clear
-    expandedCell = cell.classList.contains("expanded") ? cell : null;
-  });
+  // Toggle expansion
+  cell.classList.toggle("expanded");
 });

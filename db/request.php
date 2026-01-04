@@ -1291,52 +1291,13 @@ try {
                 break;
 
 
-            /* ---------------- GET CLASS MEMBERS ---------------- */
+                /* ---------------- GET CLASS MEMBERS ---------------- */
             case "getClassMembers":
                 try {
                     $class_id = $_POST['class_id'];
-                    $search = $_POST['search'] ?? '';
-                    $page = intval($_POST['page'] ?? 1);
-                    $limit = 10;
-                    $offset = ($page - 1) * $limit;
+                    $search   = $_POST['search'] ?? '';
 
                     $searchTerm = "%$search%";
-
-                    $where = "
-                        cm.class_id = ?
-                        AND (
-                            u.name LIKE ?
-                            OR s.lrn LIKE ?
-                            OR u.email LIKE ?
-                            OR u.gender LIKE ?
-                            OR u.address LIKE ?
-                            OR s.guardian_email LIKE ?
-                            OR s.guardian_contact LIKE ?
-                            OR cm.status LIKE ?
-                        )
-                    ";
-
-                    $params = [
-                        $class_id,
-                        $searchTerm,
-                        $searchTerm,
-                        $searchTerm,
-                        $searchTerm,
-                        $searchTerm,
-                        $searchTerm,
-                        $searchTerm,
-                        $searchTerm
-                    ];
-
-                    $countSql = "
-                        SELECT COUNT(*) AS total
-                        FROM class_members cm
-                        INNER JOIN students s ON s.student_id = cm.student_id
-                        INNER JOIN users u ON u.id = s.student_id
-                        WHERE $where
-                    ";
-
-                    $total = $mydb->rawQuery($countSql, $params)[0]['total'];
 
                     $sql = "
                         SELECT
@@ -1355,24 +1316,388 @@ try {
                         FROM class_members cm
                         INNER JOIN students s ON s.student_id = cm.student_id
                         INNER JOIN users u ON u.id = s.student_id
-                        WHERE $where
+                        WHERE cm.class_id = ?
+                        AND (
+                            u.name LIKE ?
+                            OR s.lrn LIKE ?
+                            OR u.email LIKE ?
+                        )
                         ORDER BY u.name ASC
-                        LIMIT $limit OFFSET $offset
+                    ";
+
+                    $data = $mydb->rawQuery($sql, [
+                        $class_id,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm
+                    ]);
+
+                    $response = [
+                        "status" => "success",
+                        "data" => $data
+                    ];
+
+                } catch (Exception $e) {
+                    $response = ["status" => "error", "message" => $e->getMessage()];
+                }
+                break;
+
+                // case "getClassMembers":
+                //     try {
+                //         $class_id = $_POST['class_id'];
+                //         $search   = $_POST['search'] ?? '';
+                //         $page     = intval($_POST['page'] ?? 1);
+                //         $limit    = 10;
+                //         $offset   = ($page - 1) * $limit;
+
+                //         $attendanceDate = $_POST['attendance_date'] ?? null;
+                //         $quarterName    = $_POST['quarter'] ?? null;
+
+                //         $searchTerm = "%$search%";
+
+                //         // ---------------- BASE WHERE ----------------
+                //         $where = "
+                //             cm.class_id = ?
+                //             AND (
+                //                 u.name LIKE ?
+                //                 OR s.lrn LIKE ?
+                //                 OR u.email LIKE ?
+                //                 OR u.gender LIKE ?
+                //                 OR u.address LIKE ?
+                //                 OR s.guardian_email LIKE ?
+                //                 OR s.guardian_contact LIKE ?
+                //                 OR cm.status LIKE ?
+                //             )
+                //         ";
+
+                //         $whereParams = [
+                //             $class_id,
+                //             $searchTerm,
+                //             $searchTerm,
+                //             $searchTerm,
+                //             $searchTerm,
+                //             $searchTerm,
+                //             $searchTerm,
+                //             $searchTerm,
+                //             $searchTerm
+                //         ];
+
+                //         // ---------------- ATTENDANCE JOIN ----------------
+                //         $attendanceJoin   = "";
+                //         $attendanceParams = [];
+
+                //         if (!empty($attendanceDate)) {
+                //             $attendanceJoin = "AND a.date = ?";
+                //             $attendanceParams[] = $attendanceDate;
+
+                //         } elseif (!empty($quarterName)) {
+                //             $quarter = $mydb->rawQuery(
+                //                 "SELECT start_date, end_date FROM quarter WHERE quarter_name = ? LIMIT 1",
+                //                 [$quarterName]
+                //             );
+
+                //             if (!empty($quarter)) {
+                //                 $attendanceJoin = "AND a.date BETWEEN ? AND ?";
+                //                 $attendanceParams[] = $quarter[0]['start_date'];
+                //                 $attendanceParams[] = $quarter[0]['end_date'];
+                //             }
+                //         }
+
+                //         // ---------------- COUNT ----------------
+                //         $countSql = "
+                //             SELECT COUNT(*) AS total
+                //             FROM class_members cm
+                //             INNER JOIN students s ON s.student_id = cm.student_id
+                //             INNER JOIN users u ON u.id = s.student_id
+                //             WHERE $where
+                //         ";
+
+                //         $total = $mydb->rawQuery($countSql, $whereParams)[0]['total'];
+
+                //         // ---------------- MAIN QUERY ----------------
+                //         $sql = "
+                //             SELECT
+                //                 u.id AS student_id,
+                //                 u.name,
+                //                 u.profile_photo,
+                //                 s.lrn,
+                //                 u.age,
+                //                 u.gender,
+                //                 u.birthdate,
+                //                 u.address,
+                //                 u.email,
+                //                 s.guardian_email,
+                //                 s.guardian_contact,
+                //                 cm.status AS class_status,
+                //                 a.status AS attendance_status,
+                //                 a.date   AS attendance_date
+                //             FROM class_members cm
+                //             INNER JOIN students s ON s.student_id = cm.student_id
+                //             INNER JOIN users u ON u.id = s.student_id
+                //             LEFT JOIN attendance a
+                //                 ON a.student_id = cm.student_id
+                //                 AND a.class_id = cm.class_id
+                //                 $attendanceJoin
+                //             WHERE $where
+                //             ORDER BY u.name ASC
+                //             LIMIT $limit OFFSET $offset
+                //         ";
+
+                //         // ATTENDANCE PARAMS FIRST
+                //     $finalParams = array_merge($whereParams, $attendanceParams);
+                //     $data = $mydb->rawQuery($sql, $finalParams);
+
+                //         $response = [
+                //             "status" => "success",
+                //             "data"   => $data,
+                //             "total"  => $total,
+                //             "limit"  => $limit,
+                //             "page"   => $page
+                //         ];
+
+                //     } catch (Exception $e) {
+                //         $response = [
+                //             "status"  => "error",
+                //             "message" => $e->getMessage()
+                //         ];
+                //     }
+                //     break;
+
+
+
+
+            /* ---------------- GET CLASS MEMBERS ATTENDANCE ---------------- */
+            case "getClassMembersAttendance":
+                try {
+                    $class_id = $_POST['class_id'];
+                    $date     = $_POST['attendance_date'];
+                    $search   = $_POST['search'] ?? '';
+
+                    $searchTerm = "%$search%";
+
+                    $sql = "
+                        SELECT
+                            u.id AS student_id,
+                            u.name,
+                            u.profile_photo,
+                            s.lrn,
+                            u.age,
+                            u.gender,
+                            u.birthdate,
+                            u.address,
+                            u.email,
+                            s.guardian_email,
+                            s.guardian_contact,
+                            cm.status AS class_status,
+                            a.status  AS attendance_status,
+                            a.reason
+                        FROM class_members cm
+                        INNER JOIN students s ON s.student_id = cm.student_id
+                        INNER JOIN users u ON u.id = s.student_id
+                        LEFT JOIN attendance a
+                            ON a.student_id = cm.student_id
+                            AND a.class_id = cm.class_id
+                            AND a.date = ?
+                        WHERE cm.class_id = ?
+                        AND (
+                            u.name LIKE ?
+                            OR s.lrn LIKE ?
+                            OR u.email LIKE ?
+                        )
+                        ORDER BY u.name ASC
+                    ";
+
+                    $data = $mydb->rawQuery($sql, [
+                        $date,
+                        $class_id,
+                        $searchTerm,
+                        $searchTerm,
+                        $searchTerm
+                    ]);
+
+                    $response = [
+                        "status" => "success",
+                        "data" => $data
+                    ];
+
+                } catch (Exception $e) {
+                    $response = ["status" => "error", "message" => $e->getMessage()];
+                }
+                break;
+
+
+
+            /* ---------------- GET ATTENDANCE REPORT ---------------- */
+            case "getAttendanceReport":
+                try {
+                    $class_id = $_POST['class_id'];
+                    $quarter  = $_POST['quarter'] ?? null;
+                    $search   = trim($_POST['search'] ?? '');
+
+                    $params = [];
+                    $searchSQL = "";
+
+                    /* ---- SEARCH FILTER (Name, LRN, Email ONLY) ---- */
+                    if ($search !== "") {
+                        $searchSQL = "
+                            AND (
+                                u.name  LIKE ?
+                                OR s.lrn LIKE ?
+                                OR u.email LIKE ?
+                            )
+                        ";
+                        $like = "%{$search}%";
+                        $params[] = $like;
+                        $params[] = $like;
+                        $params[] = $like;
+                    }
+
+                    /* ---- QUARTER DATE FILTER ---- */
+                    $dateFilter = "";
+                    if ($quarter) {
+                        $q = $mydb->rawQuery(
+                            "SELECT start_date, end_date
+                            FROM quarter
+                            WHERE quarter_name = ?
+                            LIMIT 1",
+                            [$quarter]
+                        );
+
+                        if ($q) {
+                            $dateFilter = "AND a.date BETWEEN ? AND ?";
+                            $params[] = $q[0]['start_date'];
+                            $params[] = $q[0]['end_date'];
+                        }
+                    }
+
+                    /* class_id LAST */
+                    $params[] = $class_id;
+
+                    $sql = "
+                        SELECT
+                            u.id AS student_id,
+                            u.name,
+                            u.profile_photo,
+                            s.lrn,
+                            u.email,
+
+                            COALESCE(SUM(CASE WHEN a.status = 'present' THEN 1 END), 0) AS total_present,
+                            COALESCE(SUM(CASE WHEN a.status = 'late' THEN 1 END), 0)    AS total_late,
+                            COALESCE(SUM(CASE WHEN a.status = 'absent' THEN 1 END), 0)  AS total_absent,
+                            COALESCE(SUM(CASE WHEN a.status = 'excuse' THEN 1 END), 0)  AS total_excuse
+
+                        FROM class_members cm
+                        INNER JOIN students s ON s.student_id = cm.student_id
+                        INNER JOIN users u ON u.id = s.student_id
+                        LEFT JOIN attendance a
+                            ON a.student_id = cm.student_id
+                            AND a.class_id = cm.class_id
+                            $dateFilter
+                        WHERE cm.class_id = ?
+                        $searchSQL
+                        GROUP BY u.id
+                        ORDER BY u.name ASC
                     ";
 
                     $data = $mydb->rawQuery($sql, $params);
 
                     $response = [
                         "status" => "success",
-                        "data" => $data,
-                        "total" => $total,
-                        "limit" => $limit,
-                        "page" => $page
+                        "data" => $data
                     ];
+
                 } catch (Exception $e) {
-                    $response = ["status" => "error", "message" => $e->getMessage()];
+                    $response = [
+                        "status" => "error",
+                        "message" => $e->getMessage()
+                    ];
                 }
                 break;
+
+
+
+            // /* ---------------- GET CLASS MEMBERS ---------------- */
+            // case "getClassMembers":
+            //     try {
+            //         $class_id = $_POST['class_id'];
+            //         $search = $_POST['search'] ?? '';
+            //         $page = intval($_POST['page'] ?? 1);
+            //         $limit = 10;
+            //         $offset = ($page - 1) * $limit;
+
+            //         $searchTerm = "%$search%";
+
+            //         $where = "
+            //             cm.class_id = ?
+            //             AND (
+            //                 u.name LIKE ?
+            //                 OR s.lrn LIKE ?
+            //                 OR u.email LIKE ?
+            //                 OR u.gender LIKE ?
+            //                 OR u.address LIKE ?
+            //                 OR s.guardian_email LIKE ?
+            //                 OR s.guardian_contact LIKE ?
+            //                 OR cm.status LIKE ?
+            //             )
+            //         ";
+
+            //         $params = [
+            //             $class_id,
+            //             $searchTerm,
+            //             $searchTerm,
+            //             $searchTerm,
+            //             $searchTerm,
+            //             $searchTerm,
+            //             $searchTerm,
+            //             $searchTerm,
+            //             $searchTerm
+            //         ];
+
+            //         $countSql = "
+            //             SELECT COUNT(*) AS total
+            //             FROM class_members cm
+            //             INNER JOIN students s ON s.student_id = cm.student_id
+            //             INNER JOIN users u ON u.id = s.student_id
+            //             WHERE $where
+            //         ";
+
+            //         $total = $mydb->rawQuery($countSql, $params)[0]['total'];
+
+            //         $sql = "
+            //             SELECT
+            //                 u.id AS student_id,
+            //                 u.name,
+            //                 u.profile_photo,
+            //                 s.lrn,
+            //                 u.age,
+            //                 u.gender,
+            //                 u.birthdate,
+            //                 u.address,
+            //                 u.email,
+            //                 s.guardian_email,
+            //                 s.guardian_contact,
+            //                 cm.status
+            //             FROM class_members cm
+            //             INNER JOIN students s ON s.student_id = cm.student_id
+            //             INNER JOIN users u ON u.id = s.student_id
+            //             WHERE $where
+            //             ORDER BY u.name ASC
+            //             LIMIT $limit OFFSET $offset
+            //         ";
+
+            //         $data = $mydb->rawQuery($sql, $params);
+
+            //         $response = [
+            //             "status" => "success",
+            //             "data" => $data,
+            //             "total" => $total,
+            //             "limit" => $limit,
+            //             "page" => $page
+            //         ];
+            //     } catch (Exception $e) {
+            //         $response = ["status" => "error", "message" => $e->getMessage()];
+            //     }
+            //     break;
 
 
 
@@ -1458,6 +1783,56 @@ try {
                     $response = ["status" => "error", "message" => $e->getMessage()];
                 }
                 break;
+
+
+
+            /* ---------------- SAVE ATTENDANCE ---------------- */
+            case "saveAttendance":
+                try {
+                    $class_id   = $_POST['class_id'];
+                    $student_id = $_POST['student_id'];
+                    $date       = $_POST['date'];
+                    $status     = $_POST['status'];
+                    $reason     = $_POST['reason'] ?? null;
+
+                    // Check if attendance exists
+                    $existing = $mydb->rawQuery(
+                        "SELECT id FROM attendance 
+                        WHERE class_id = ? AND student_id = ? AND date = ?",
+                        [$class_id, $student_id, $date]
+                    );
+
+                    if (!empty($existing)) {
+                        // Update
+                        $mydb->rawQuery(
+                            "UPDATE attendance 
+                            SET status = ?, reason = ?
+                            WHERE id = ?",
+                            [$status, $reason, $existing[0]['id']]
+                        );
+                    } else {
+                        // Insert
+                        $mydb->rawQuery(
+                            "INSERT INTO attendance 
+                                (class_id, student_id, date, status, reason)
+                            VALUES (?, ?, ?, ?, ?)",
+                            [$class_id, $student_id, $date, $status, $reason]
+                        );
+                    }
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Attendance saved"
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => $e->getMessage()
+                    ];
+                }
+                break;
+
 
 
 
