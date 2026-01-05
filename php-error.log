@@ -26,3 +26,57 @@ Stack trace:
 [12-Dec-2025 13:51:38 Asia/Manila] PHP Warning:  Undefined array key "quarter_name" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 314
 [12-Dec-2025 13:51:38 Asia/Manila] PHP Warning:  Undefined array key "quarter_name" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 314
 [12-Dec-2025 13:51:38 Asia/Manila] PHP Warning:  Undefined array key "quarter_name" in C:\xampp\htdocs\school_attendance_ms\db\request.php on line 314
+[05-Jan-2026 23:19:07 Asia/Manila] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\school_attendance_ms\db\db.php:215
+Stack trace:
+#0 C:\xampp\htdocs\school_attendance_ms\db\db.php(215): mysqli_stmt->bind_param('ssssss', 3, 'active', '%%', '%%', '%%', '%%')
+#1 C:\xampp\htdocs\school_attendance_ms\db\request.php(1173): myDB->rawQuery('\r\n             ...', Array)
+#2 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\db.php on line 215
+[05-Jan-2026 23:19:11 Asia/Manila] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\school_attendance_ms\db\db.php:215
+Stack trace:
+#0 C:\xampp\htdocs\school_attendance_ms\db\db.php(215): mysqli_stmt->bind_param('ssssss', 3, 'active', '%%', '%%', '%%', '%%')
+#1 C:\xampp\htdocs\school_attendance_ms\db\request.php(1173): myDB->rawQuery('\r\n             ...', Array)
+#2 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\db.php on line 215
+[05-Jan-2026 23:20:15 Asia/Manila] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\school_attendance_ms\db\db.php:215
+Stack trace:
+#0 C:\xampp\htdocs\school_attendance_ms\db\db.php(215): mysqli_stmt->bind_param('ssssss', 3, 'active', '%%', '%%', '%%', '%%')
+#1 C:\xampp\htdocs\school_attendance_ms\db\request.php(1173): myDB->rawQuery('\r\n             ...', Array)
+#2 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\db.php on line 215
+[05-Jan-2026 23:21:03 Asia/Manila] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\school_attendance_ms\db\db.php:215
+Stack trace:
+#0 C:\xampp\htdocs\school_attendance_ms\db\db.php(215): mysqli_stmt->bind_param('ssssss', 3, 'active', '%%', '%%', '%%', '%%')
+#1 C:\xampp\htdocs\school_attendance_ms\db\request.php(1174): myDB->rawQuery('\r\n             ...', Array)
+#2 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\db.php on line 215
+[05-Jan-2026 23:21:05 Asia/Manila] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\school_attendance_ms\db\db.php:215
+Stack trace:
+#0 C:\xampp\htdocs\school_attendance_ms\db\db.php(215): mysqli_stmt->bind_param('ssssss', 3, 'active', '%%', '%%', '%%', '%%')
+#1 C:\xampp\htdocs\school_attendance_ms\db\request.php(1174): myDB->rawQuery('\r\n             ...', Array)
+#2 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\db.php on line 215
+[05-Jan-2026 23:21:12 Asia/Manila] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\school_attendance_ms\db\db.php:215
+Stack trace:
+#0 C:\xampp\htdocs\school_attendance_ms\db\db.php(215): mysqli_stmt->bind_param('ssssss', 3, 'active', '%%', '%%', '%%', '%%')
+#1 C:\xampp\htdocs\school_attendance_ms\db\request.php(1174): myDB->rawQuery('\r\n             ...', Array)
+#2 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\db.php on line 215
+[05-Jan-2026 23:21:15 Asia/Manila] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\school_attendance_ms\db\db.php:215
+Stack trace:
+#0 C:\xampp\htdocs\school_attendance_ms\db\db.php(215): mysqli_stmt->bind_param('ssssss', 3, 'active', '%%', '%%', '%%', '%%')
+#1 C:\xampp\htdocs\school_attendance_ms\db\request.php(1174): myDB->rawQuery('\r\n             ...', Array)
+#2 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\db.php on line 215
+[05-Jan-2026 23:21:22 Asia/Manila] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\school_attendance_ms\db\db.php:215
+Stack trace:
+#0 C:\xampp\htdocs\school_attendance_ms\db\db.php(215): mysqli_stmt->bind_param('ssssss', 3, 'archived', '%%', '%%', '%%', '%%')
+#1 C:\xampp\htdocs\school_attendance_ms\db\request.php(1174): myDB->rawQuery('\r\n             ...', Array)
+#2 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\db.php on line 215
+[05-Jan-2026 23:21:23 Asia/Manila] PHP Fatal error:  Uncaught ArgumentCountError: The number of variables must match the number of parameters in the prepared statement in C:\xampp\htdocs\school_attendance_ms\db\db.php:215
+Stack trace:
+#0 C:\xampp\htdocs\school_attendance_ms\db\db.php(215): mysqli_stmt->bind_param('ssssss', 3, 'active', '%%', '%%', '%%', '%%')
+#1 C:\xampp\htdocs\school_attendance_ms\db\request.php(1174): myDB->rawQuery('\r\n             ...', Array)
+#2 {main}
+  thrown in C:\xampp\htdocs\school_attendance_ms\db\db.php on line 215

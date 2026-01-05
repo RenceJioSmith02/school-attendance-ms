@@ -51,7 +51,7 @@
     // =============================
     // Logout process
     // =============================
-    $(document).on("click", ".btn-secondary", function (e) {
+    $(document).on("click", ".logout-btn", function (e) {
         e.preventDefault();
 
         $.ajax({

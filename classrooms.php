@@ -154,6 +154,11 @@ include_once 'partials/session.php'
 
     <script src="assets/js/main.js"></script>
     <script>
+        const CURRENT_USER_ROLE = "<?= $_SESSION['user_role'] ?>";
+        const targetPage =
+            CURRENT_USER_ROLE === "teacher"
+                ? "classroom_view.php"
+                : "classroom_student_view.php";
 
         $(document).ready(function () {
             loadClassrooms();
@@ -187,46 +192,90 @@ include_once 'partials/session.php'
 
                     res.data.forEach(c => {
 
-                        let actionBtn = `
-                            ${c.status === "active" 
-                                ? `<div class="dropdown-item archive" data-id="${c.id}">Archive</div>` 
-                                : `<div class="dropdown-item unarchive" data-id="${c.id}">Unarchive</div>`
-                            }
-                        `;
+                        // ---------------- ROLE-BASED PAGE ----------------
+                        const targetPage =
+                            CURRENT_USER_ROLE === "teacher"
+                                ? "classroom_view.php"
+                                : "classroom_student_view.php";
+
+                        // ---------------- TEACHER MENU ----------------
+                        let teacherMenu = "";
+
+                        if (CURRENT_USER_ROLE === "teacher") {
+                            let actionBtn = `
+                                ${c.status === "active" 
+                                    ? `<div class="dropdown-item archive" data-id="${c.id}">Archive</div>` 
+                                    : `<div class="dropdown-item unarchive" data-id="${c.id}">Unarchive</div>`
+                                }
+                            `;
+
+                            teacherMenu = `
+                                <div class="card-menu">⋮</div>
+
+                                <div class="card-dropdown">
+                                    ${actionBtn}
+                                    <div class="dropdown-item delete" data-id="${c.id}">Delete</div>
+                                    <div class="dropdown-item edit" data-id="${c.id}">Edit</div>
+                                </div>
+                            `;
+                        }
+
+                        // ---------------- STUDENT PENDING ACTIONS ----------------
+                        let studentPendingActions = "";
+
+                        if (
+                            CURRENT_USER_ROLE === "student" &&
+                            c.membership_status === "pending"
+                        ) {
+                            studentPendingActions = `
+                                <div class="student-actions">
+                                    <button class="btn-primary join-class" data-id="${c.id}">
+                                        Join
+                                    </button>
+                                    <button class="btn-secondary decline-class" data-id="${c.id}">
+                                        Decline
+                                    </button>
+                                </div>
+                            `;
+                        }
+
+                        const studentsChip =
+                            CURRENT_USER_ROLE === "teacher"
+                                ? `
+                                <div class="students-chip">
+                                    <img src="assets/images/system_image/svg/student-count.svg" alt="">
+                                    <span>${c.total_students} students</span>
+                                </div>
+                                `
+                                : "";
 
                         html += `
                         <div class="class-card" style="border-color:${c.background_color}">
-                            
+
                             <div class="card-header">
                                 <p class="teacher-name">${c.teacher_name}</p>
                                 <img class="teacher-img" src="assets/images/user_image/${c.teacher_photo}" alt="">
                             </div>
 
-                            <a href="classroom_view.php?id=${c.id}" class="card-main" style="background-color: ${c.background_color}33;">
+                            <a href="${targetPage}?id=${c.id}"
+                            class="card-main"
+                            style="background-color: ${c.background_color}33;">
+
                                 <h2 class="subject-title">${c.subject_name.toUpperCase()}</h2>
                                 <p class="section-name">${c.grade_level} – ${c.section_name}</p>
 
-                                <div class="students-chip">
-                                    <img src="assets/images/system_image/svg/student-count.svg" alt="">
-                                    <span>${c.total_students} students</span>
-                                </div>
+                                ${studentsChip}
+
                             </a>
 
                             <div class="card-footer">
-                                <div class="card-menu">⋮</div>
-
-                                <div class="card-dropdown">
-
-                                    ${actionBtn}
-
-                                    <div class="dropdown-item delete" data-id="${c.id}">Delete</div>
-                                    <div class="dropdown-item edit" data-id="${c.id}">Edit</div>
-                                </div>
+                                ${teacherMenu}
+                                ${studentPendingActions}
                             </div>
 
                         </div>`;
-
                     });
+
 
                     $(".card-container").html(html);
                 }
@@ -444,51 +493,51 @@ include_once 'partials/session.php'
 
 
         // ===============================
-// DELETE CLASSROOM (with confirmation)
-// ===============================
-$(document).on("click", ".dropdown-item.delete", function () {
+        // DELETE CLASSROOM (with confirmation)
+        // ===============================
+        $(document).on("click", ".dropdown-item.delete", function () {
 
-    let id = $(this).data("id");
+            let id = $(this).data("id");
 
-    Swal.fire({
-        title: "Delete this class?",
-        text: "This action is permanent and cannot be undone!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, delete it",
-        cancelButtonText: "Cancel",
-        confirmButtonColor: '#15285C',
-        cancelButtonColor: '#e74c3c'
-    }).then((result) => {
+            Swal.fire({
+                title: "Delete this class?",
+                text: "This action is permanent and cannot be undone!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it",
+                cancelButtonText: "Cancel",
+                confirmButtonColor: '#15285C',
+                cancelButtonColor: '#e74c3c'
+            }).then((result) => {
 
-        if (result.isConfirmed) {
+                if (result.isConfirmed) {
 
-            $.ajax({
-                url: "db/request.php",
-                type: "POST",
-                data: { action: "delete_classroom", class_id: id },
-                dataType: "json",
+                    $.ajax({
+                        url: "db/request.php",
+                        type: "POST",
+                        data: { action: "delete_classroom", class_id: id },
+                        dataType: "json",
 
-                success: function (res) {
-                    if (res.status === "success") {
-                        Swal.fire("Deleted!", "Classroom has been deleted.", "success");
-                        loadClassrooms();
-                    } else {
-                        Swal.fire("Error!", res.message, "error");
-                    }
-                },
+                        success: function (res) {
+                            if (res.status === "success") {
+                                Swal.fire("Deleted!", "Classroom has been deleted.", "success");
+                                loadClassrooms();
+                            } else {
+                                Swal.fire("Error!", res.message, "error");
+                            }
+                        },
 
-                error: function (xhr, status, error) {
-                    console.error(error);
-                    Swal.fire("Error!", "Something went wrong!", "error");
+                        error: function (xhr, status, error) {
+                            console.error(error);
+                            Swal.fire("Error!", "Something went wrong!", "error");
+                        }
+                    });
+
                 }
+
             });
 
-        }
-
-    });
-
-});
+        });
 
 
 
@@ -520,6 +569,61 @@ $(document).on("click", ".dropdown-item.delete", function () {
             // If click is outside → close all dropdowns
             allDropdowns.forEach(drop => drop.style.display = "none");
         });
+
+
+
+
+
+        // ===============================
+        // STUDENT JOIN CLASS
+        // ===============================
+        $(document).on("click", ".join-class", function (e) {
+            e.preventDefault();    
+            e.stopPropagation();    
+
+            const classId = $(this).data("id");
+
+            $.post("db/request.php", {
+                action: "joinClass",
+                class_id: classId
+            }, function (res) {
+                if (res.success) {
+                    Swal.fire("Joined!", res.message, "success");
+                    loadClassrooms();
+                }
+            }, "json");
+        });
+
+        
+        // ===============================
+        // STUDENT DECLINE CLASS
+        // ===============================
+        $(document).on("click", ".decline-class", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const classId = $(this).data("id");
+
+            Swal.fire({
+                title: "Decline class invitation?",
+                icon: "warning",
+                showCancelButton: true
+            }).then(result => {
+                if (result.isConfirmed) {
+                    $.post("db/request.php", {
+                        action: "declineClass",
+                        class_id: classId
+                    }, function (res) {
+                        if (res.success) {
+                            Swal.fire("Declined", res.message, "success");
+                            loadClassrooms();
+                        }
+                    }, "json");
+                }
+            });
+        });
+
+
 
     </script>
 

@@ -201,11 +201,7 @@ include_once 'partials/session.php'
             // --------------------- INIT ---------------------
             loadClassMembers();
             applyModeUI();
-
-            if (currentMode === "user_management") {
-                loadInvitableStudents();
-            }
-
+            loadInvitableStudents();
 
             // --------------------- FUNCTIONS ---------------------
             function getTodayPH() {
@@ -368,19 +364,6 @@ include_once 'partials/session.php'
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
             function loadInvitableStudents() {
                 $.ajax({
                     url: "db/request.php",
@@ -484,22 +467,22 @@ include_once 'partials/session.php'
                 if (currentMode === "attendance") {
 
                     $("#class_members_table thead").html(`
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Photo</th>
-                <th>LRN</th>
-                <th>Age</th>
-                <th>Gender</th>
-                <th>Birthdate</th>
-                <th>Address</th>
-                <th>Email</th>
-                <th>Guardian Email</th>
-                <th>Guardian Contact</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        `);
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Photo</th>
+                            <th>LRN</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Birthdate</th>
+                            <th>Address</th>
+                            <th>Email</th>
+                            <th>Guardian Email</th>
+                            <th>Guardian Contact</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    `);
 
                     $("#attendanceDate").removeClass("hidden");
                     $("#showInviteStudentForm").addClass("hidden");
@@ -512,18 +495,18 @@ include_once 'partials/session.php'
                 else if (currentMode === "report") {
 
                     $("#class_members_table thead").html(`
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Photo</th>
-                <th>LRN</th>
-                <th>Email</th>
-                <th>P</th>
-                <th>L</th>
-                <th>A</th>
-                <th>E</th>
-            </tr>
-        `);
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Photo</th>
+                            <th>LRN</th>
+                            <th>Email</th>
+                            <th>Total Present</th>
+                            <th>Total Late</th>
+                            <th>Total Absent</th>
+                            <th>Total Excuse</th>
+                        </tr>
+                    `);
 
                     $("#attendanceDate").addClass("hidden");
                     $("#showInviteStudentForm").addClass("hidden");
@@ -534,22 +517,22 @@ include_once 'partials/session.php'
                 else if (currentMode === "user_management") {
 
                     $("#class_members_table thead").html(`
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Photo</th>
-                <th>LRN</th>
-                <th>Age</th>
-                <th>Gender</th>
-                <th>Birthdate</th>
-                <th>Address</th>
-                <th>Email</th>
-                <th>Guardian Email</th>
-                <th>Guardian Contact</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
-        `);
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Photo</th>
+                            <th>LRN</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Birthdate</th>
+                            <th>Address</th>
+                            <th>Email</th>
+                            <th>Guardian Email</th>
+                            <th>Guardian Contact</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    `);
 
                     $("#attendanceDate").addClass("hidden");
                     $("#showInviteStudentForm").removeClass("hidden");
@@ -561,17 +544,12 @@ include_once 'partials/session.php'
             }
 
 
-
             $("#filterShowbuttons").on("change", function () {
                 currentMode = $(this).val();
                 currentPage = 1;
                 applyModeUI();
                 loadClassMembers(); // ✅ ADD THIS
             });
-
-
-
-
 
 
             // --------------------- MARKING STUDENT ATTENDANCE ---------------------

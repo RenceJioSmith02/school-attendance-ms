@@ -20,6 +20,10 @@ require_once "db.php";
 $mydb = new myDB();
 $response = ["status" => "error", "message" => "Unknown error"];
 
+// if ($_SESSION['user_role'] !== 'student') {
+//     exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+// }
+
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
@@ -1145,6 +1149,7 @@ try {
                             SELECT c.*, 
                                 u.name AS teacher_name,
                                 u.profile_photo AS teacher_photo,
+                                cm.status AS membership_status,
                                 (
                                     SELECT COUNT(*) 
                                     FROM class_members 
@@ -1154,7 +1159,6 @@ try {
                             INNER JOIN classrooms c ON c.id = cm.class_id
                             LEFT JOIN users u ON u.id = c.teacher_id
                             WHERE cm.student_id = ?
-                            AND cm.status = 'joined'
                             AND c.status = ?
                             AND (
                                     c.section_name LIKE ?
@@ -1322,6 +1326,7 @@ try {
                             OR s.lrn LIKE ?
                             OR u.email LIKE ?
                         )
+                        AND cm.status = 'joined'
                         ORDER BY u.name ASC
                     ";
 
@@ -1504,6 +1509,7 @@ try {
                             OR s.lrn LIKE ?
                             OR u.email LIKE ?
                         )
+                        AND cm.status = 'joined'
                         ORDER BY u.name ASC
                     ";
 
@@ -1594,6 +1600,7 @@ try {
                             AND a.class_id = cm.class_id
                             $dateFilter
                         WHERE cm.class_id = ?
+                        AND cm.status = 'joined'
                         $searchSQL
                         GROUP BY u.id
                         ORDER BY u.name ASC
@@ -1772,7 +1779,7 @@ try {
                     $mydb->insert("class_members", [
                         "class_id" => $class_id,
                         "student_id" => $student_id,
-                        "status" => "joined"
+                        "status" => "pending"
                     ]);
 
                     $response = [
@@ -1832,6 +1839,74 @@ try {
                     ];
                 }
                 break;
+
+
+            
+            // students actions
+
+            /* ---------------- JOIN CLASS ---------------- */
+            case "joinClass":
+                try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== "student") {
+                        throw new Exception("Unauthorized");
+                    }
+
+                    $class_id = $_POST['class_id'];
+                    $student_id = $_SESSION['user_id'];
+
+                    // Update existing invitation
+                    $mydb->rawQuery(
+                        "UPDATE class_members 
+             SET status = 'joined'
+             WHERE class_id = ? AND student_id = ? AND status = 'pending'",
+                        [$class_id, $student_id]
+                    );
+
+                    $response = [
+                        "success" => true,
+                        "message" => "You have successfully joined the class"
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "success" => false,
+                        "message" => $e->getMessage()
+                    ];
+                }
+                break;
+
+
+
+            /* ---------------- DECLINE CLASS ---------------- */
+            case "declineClass":
+                try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== "student") {
+                        throw new Exception("Unauthorized");
+                    }
+
+                    $class_id = $_POST['class_id'];
+                    $student_id = $_SESSION['user_id'];
+
+                    // Remove pending invitation
+                    $mydb->rawQuery(
+                        "DELETE FROM class_members 
+             WHERE class_id = ? AND student_id = ? AND status = 'pending'",
+                        [$class_id, $student_id]
+                    );
+
+                    $response = [
+                        "success" => true,
+                        "message" => "Class invitation declined"
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "success" => false,
+                        "message" => $e->getMessage()
+                    ];
+                }
+                break;
+
 
 
 
