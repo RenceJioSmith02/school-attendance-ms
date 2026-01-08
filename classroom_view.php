@@ -614,16 +614,44 @@ include_once 'partials/session.php'
             }
 
 
+        });
 
 
 
 
+        $(document).ready(function () {
 
+            let classId = new URLSearchParams(window.location.search).get("id");
 
+$("#downloadReport").on("click", function () {
+
+    const classId = new URLSearchParams(window.location.search).get("id");
+
+    if (!classId) {
+        Swal.fire("Error", "Invalid class ID", "error");
+        return;
+    }
+
+    const form = $("<form>", {
+        method: "POST",
+        action: "db/request.php"
+    });
+
+    form.append($("<input>", { name: "action", value: "downloadAttendanceReport", type: "hidden" }));
+    form.append($("<input>", { name: "class_id", value: classId, type: "hidden" }));
+    form.append($("<input>", { name: "quarter", value: $("#filterQuarter").val(), type: "hidden" }));
+    form.append($("<input>", { name: "search", value: $("#classMember_searchInput").val(), type: "hidden" }));
+
+    $("body").append(form);
+    form.submit();
+    form.remove();
+});
 
 
 
         });
+
+
 
 
         document.addEventListener("click", function (e) {

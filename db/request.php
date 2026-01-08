@@ -1792,6 +1792,52 @@ try {
                 break;
 
 
+            /* ---------------- REMOVE STUDENT FROM CLASS ---------------- */
+            case "removeStudentFromClass":
+                try {
+                    // Security check
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== "teacher") {
+                        throw new Exception("Unauthorized access");
+                    }
+
+                    $class_id = $_POST['class_id'] ?? null;
+                    $student_id = $_POST['student_id'] ?? null;
+
+                    if (!$class_id || !$student_id) {
+                        throw new Exception("Invalid parameters");
+                    }
+
+                    // Optional: verify this teacher owns the class
+                    $class = $mydb->select_one("classrooms", "*", [
+                        "id" => $class_id,
+                        "teacher_id" => $_SESSION['user_id']
+                    ]);
+
+                    if (!$class) {
+                        throw new Exception("You are not allowed to modify this class");
+                    }
+
+                    // Remove student from class
+                    $mydb->rawQuery(
+                        "DELETE FROM class_members WHERE class_id = ? AND student_id = ?",
+                        [$class_id, $student_id]
+                    );
+
+                    $response = [
+                        "status" => "success",
+                        "message" => "Student removed from class successfully"
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => $e->getMessage()
+                    ];
+                }
+                break;
+
+
+
 
             /* ---------------- SAVE ATTENDANCE ---------------- */
             case "saveAttendance":
@@ -1842,6 +1888,126 @@ try {
 
 
             
+                /* ---------------- DOWNLOAD ATTENDANCE REPORT ---------------- */
+                case "downloadAttendanceReport":
+                    try {
+
+                        if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== "teacher") {
+                            throw new Exception("Unauthorized");
+                        }
+
+                        $class_id = $_POST['class_id'];
+                        $quarter  = $_POST['quarter'] ?? null;
+                        $search   = trim($_POST['search'] ?? '');
+
+                        $params = [];
+                        $searchSQL = "";
+
+                        /* ---- SEARCH FILTER ---- */
+                        if ($search !== "") {
+                            $searchSQL = "
+                                AND (
+                                    u.name LIKE ?
+                                    OR s.lrn LIKE ?
+                                    OR u.email LIKE ?
+                                )
+                            ";
+                            $like = "%$search%";
+                            $params[] = $like;
+                            $params[] = $like;
+                            $params[] = $like;
+                        }
+
+                        /* ---- QUARTER DATE FILTER (SAME AS TABLE) ---- */
+                        $dateFilter = "";
+                        if ($quarter) {
+                            $q = $mydb->rawQuery(
+                                "SELECT start_date, end_date
+                                FROM quarter
+                                WHERE quarter_name = ?
+                                LIMIT 1",
+                                [$quarter]
+                            );
+
+                            if ($q) {
+                                $dateFilter = "AND a.date BETWEEN ? AND ?";
+                                $params[] = $q[0]['start_date'];
+                                $params[] = $q[0]['end_date'];
+                            }
+                        }
+
+                        /* class_id LAST */
+                        $params[] = $class_id;
+
+                        /* ✅ SAME QUERY AS TABLE */
+                        $sql = "
+                            SELECT
+                                u.name,
+                                s.lrn,
+                                u.email,
+                                COALESCE(SUM(CASE WHEN a.status = 'present' THEN 1 END), 0) AS total_present,
+                                COALESCE(SUM(CASE WHEN a.status = 'late' THEN 1 END), 0)    AS total_late,
+                                COALESCE(SUM(CASE WHEN a.status = 'absent' THEN 1 END), 0)  AS total_absent,
+                                COALESCE(SUM(CASE WHEN a.status = 'excuse' THEN 1 END), 0)  AS total_excuse
+                            FROM class_members cm
+                            INNER JOIN students s ON s.student_id = cm.student_id
+                            INNER JOIN users u ON u.id = s.student_id
+                            LEFT JOIN attendance a
+                                ON a.student_id = cm.student_id
+                                AND a.class_id = cm.class_id
+                                $dateFilter
+                            WHERE cm.class_id = ?
+                            AND cm.status = 'joined'
+                            $searchSQL
+                            GROUP BY u.id
+                            ORDER BY u.name ASC
+                        ";
+
+                        $rows = $mydb->rawQuery($sql, $params);
+
+                        /* 🔥 FORCE CSV DOWNLOAD */
+                        header("Content-Type: text/csv");
+                        header("Content-Disposition: attachment; filename=attendance_report.csv");
+                        header("Pragma: no-cache");
+                        header("Expires: 0");
+
+                        $output = fopen("php://output", "w");
+
+                        fputcsv($output, [
+                            "Name",
+                            "LRN",
+                            "Email",
+                            "Total Present",
+                            "Total Late",
+                            "Total Absent",
+                            "Total Excused"
+                        ]);
+
+                        foreach ($rows as $r) {
+                            fputcsv($output, [
+                                $r['name'],
+                                $r['lrn'],
+                                $r['email'],
+                                $r['total_present'],
+                                $r['total_late'],
+                                $r['total_absent'],
+                                $r['total_excuse']
+                            ]);
+                        }
+
+                        fclose($output);
+                        exit; // 🔥 REQUIRED
+
+                    } catch (Exception $e) {
+                        http_response_code(403);
+                        echo $e->getMessage();
+                        exit;
+                    }
+                    break;
+
+
+
+
             // students actions
 
             /* ---------------- JOIN CLASS ---------------- */
@@ -1906,6 +2072,75 @@ try {
                     ];
                 }
                 break;
+
+
+
+            /* ---------------- GET STUDENT ATTENDANCE (CALENDAR + TOTALS) ---------------- */
+            case "getStudentAttendance":
+                try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== "student") {
+                        throw new Exception("Unauthorized");
+                    }
+
+                    $class_id = $_POST['class_id'];
+                    $student_id = $_SESSION['user_id'];
+                    $month = $_POST['month']; // YYYY-MM
+
+                    $startDate = $month . "-01";
+                    $endDate = date("Y-m-t", strtotime($startDate));
+
+                    // ========== DAILY ATTENDANCE ==========
+                    $attendanceSql = "
+            SELECT 
+                date,
+                status
+            FROM attendance
+            WHERE class_id = ?
+              AND student_id = ?
+              AND date BETWEEN ? AND ?
+        ";
+
+                    $attendanceData = $mydb->rawQuery($attendanceSql, [
+                        $class_id,
+                        $student_id,
+                        $startDate,
+                        $endDate
+                    ]);
+
+                    // ========== TOTAL COUNTS ==========
+                    $totalsSql = "
+            SELECT
+                SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) AS total_present,
+                SUM(CASE WHEN status = 'absent'  THEN 1 ELSE 0 END) AS total_absent,
+                SUM(CASE WHEN status = 'late'    THEN 1 ELSE 0 END) AS total_late,
+                SUM(CASE WHEN status = 'excuse'  THEN 1 ELSE 0 END) AS total_excuse
+            FROM attendance
+            WHERE class_id = ?
+              AND student_id = ?
+              AND date BETWEEN ? AND ?
+        ";
+
+                    $totals = $mydb->rawQuery($totalsSql, [
+                        $class_id,
+                        $student_id,
+                        $startDate,
+                        $endDate
+                    ])[0];
+
+                    $response = [
+                        "status" => "success",
+                        "data" => $attendanceData,
+                        "totals" => $totals
+                    ];
+
+                } catch (Exception $e) {
+                    $response = [
+                        "status" => "error",
+                        "message" => $e->getMessage()
+                    ];
+                }
+                break;
+
 
 
 

@@ -1152,6 +1152,123 @@ INFO SECTIONS
 
 
 /* =========================
+ATTENDANCE CALENDAR
+========================= */
+
+
+.attendance-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.calendar-day {
+    height: 90px;
+    border-radius: 10px;
+    padding: 8px;
+    font-weight: 600;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.day-number {
+    font-size: 14px;
+}
+
+/* COLORS */
+.present  { background: #2ecc71; color: #fff; }
+.absent   { background: #e74c3c; color: #fff; }
+.late     { background: #f39c12; color: #fff; }
+.excused  { background: #555; color: #fff; }
+.no-record{ background: #e0e0e0; color: #555; }
+
+
+/* =========================
+ATTENDANCE SUMMARY BOXES
+========================= */
+
+.attendance-summary {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+/* Card */
+.box {
+    min-width: 180px;
+    height: 90px;
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+}
+
+/* Label */
+.box-label {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Value */
+.box-value {
+    font-size: 30px;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+/* =========================
+COLOR THEMES
+========================= */
+
+.box.present  { background: #2ecc71; color: #fff; }
+.box.absent   { background: #e74c3c; color: #fff; }
+.box.late     { background: #f39c12; color: #fff; }
+.box.excused  { background: #555;    color: #fff; }
+
+/* Mobile friendly */
+@media (max-width: 768px) {
+    .attendance-summary {
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .box {
+        min-width: 150px;
+        height: 80px;
+    }
+
+    .box-value {
+        font-size: 24px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================
 RESPONSIVE (Mobile Friendly)
 ========================= */
 @media (max-width: 600px) {
