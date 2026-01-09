@@ -97,9 +97,13 @@ try {
 
 
 
-
             case "getTeachers":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $search = $_POST["search"] ?? '';
                     $page = intval($_POST["page"] ?? 1);
                     $limit = 10;
@@ -196,6 +200,11 @@ try {
 
             case "getStudents":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $search = $_POST["search"] ?? '';
                     $page = intval($_POST["page"] ?? 1);
                     $limit = 10;
@@ -289,160 +298,6 @@ try {
                     ];
                 }
                 break;
-
-
-            
-
-            // /* ---------------- GET TEACHERS FOR TABLE ---------------- */
-            // case "getTeachers":
-            //     try {
-            //         $search = $_POST["search"] ?? '';
-            //         $page = intval($_POST["page"] ?? 1);
-            //         $limit = 10;
-            //         $offset = ($page - 1) * $limit;
-
-            //         // Sorting
-            //         $sortColumn = $_POST['sortColumn'] ?? 'id';
-            //         $sortOrder = $_POST['sortOrder'] ?? 'DESC';
-            //         $allowedSortColumns = ['name', 'department', 'age', 'id'];
-            //         if (!in_array($sortColumn, $allowedSortColumns))
-            //             $sortColumn = 'id';
-            //         $sortOrder = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
-
-            //         // Department filter
-            //         $whereClauses = ["users.name LIKE ?"];
-            //         $params = ["%$search%"];
-            //         if (!empty($_POST['department'])) {
-            //             $whereClauses[] = "teachers.department = ?";
-            //             $params[] = $_POST['department'];
-            //         }
-
-            //         // Registered filter
-            //         if (isset($_POST['registered']) && $_POST['registered'] !== '') {
-            //             $whereClauses[] = "users.is_registered = ?";
-            //             $params[] = $_POST['registered'];
-            //         }
-
-            //         $whereSQL = implode(" AND ", $whereClauses);
-
-            //         // Total rows
-            //         $countSql = "SELECT COUNT(*) AS total 
-            //          FROM users 
-            //          INNER JOIN teachers ON teachers.teacher_id = users.id 
-            //          WHERE $whereSQL";
-            //         $countData = $mydb->rawQuery($countSql, $params);
-            //         $total = $countData[0]['total'];
-
-            //         // Fetch paginated rows
-            //         $sql = "SELECT 
-            //             users.id AS user_id,
-            //             users.name,
-            //             users.profile_photo,
-            //             teachers.department,
-            //             users.age,
-            //             users.gender,
-            //             users.birthdate,
-            //             users.address,
-            //             users.email,
-            //             users.is_registered
-            //         FROM users
-            //         INNER JOIN teachers ON teachers.teacher_id = users.id
-            //         WHERE $whereSQL
-            //         ORDER BY $sortColumn $sortOrder
-            //         LIMIT $limit OFFSET $offset";
-
-            //         $data = $mydb->rawQuery($sql, $params);
-
-            //         $response = [
-            //             "status" => "success",
-            //             "data" => $data,
-            //             "total" => $total,
-            //             "limit" => $limit,
-            //             "page" => $page
-            //         ];
-
-            //     } catch (Exception $e) {
-            //         $response = [
-            //             "status" => "error",
-            //             "message" => "Failed to fetch teachers: " . $e->getMessage()
-            //         ];
-            //     }
-            //     break;
-
-
-            // /* ---------------- GET STUDENTS FOR TABLE ---------------- */
-            // case "getStudents":
-            //     try {
-            //         $search = $_POST["search"] ?? '';
-            //         $page = intval($_POST["page"] ?? 1);
-            //         $limit = 10;
-            //         $offset = ($page - 1) * $limit;
-
-            //         // Sorting
-            //         $sortColumn = $_POST['sortColumn'] ?? 'id';
-            //         $sortOrder = $_POST['sortOrder'] ?? 'DESC';
-            //         $allowedSortColumns = ['name', 'lrn', 'age', 'id'];
-            //         if (!in_array($sortColumn, $allowedSortColumns))
-            //             $sortColumn = 'id';
-            //         $sortOrder = strtoupper($sortOrder) === 'ASC' ? 'ASC' : 'DESC';
-
-            //         // Search filter (no department for students)
-            //         $whereClauses = ["users.name LIKE ?"];
-            //         $params = ["%$search%"];
-
-            //         // Registered filter
-            //         if (isset($_POST['registered']) && $_POST['registered'] !== '') {
-            //             $whereClauses[] = "users.is_registered = ?";
-            //             $params[] = $_POST['registered'];
-            //         }
-
-            //         $whereSQL = implode(" AND ", $whereClauses);
-
-            //         // Total rows
-            //         $countSql = "SELECT COUNT(*) AS total 
-            //          FROM users 
-            //          INNER JOIN students ON students.student_id = users.id 
-            //          WHERE $whereSQL";
-            //         $countData = $mydb->rawQuery($countSql, $params);
-            //         $total = $countData[0]['total'];
-
-            //         // Fetch paginated rows
-            //         $sql = "SELECT 
-            //             users.id AS user_id,
-            //             users.name,
-            //             users.profile_photo,
-            //             students.lrn,
-            //             users.age,
-            //             users.gender,
-            //             users.birthdate,
-            //             users.address,
-            //             users.email,
-            //             students.guardian_email,
-            //             students.guardian_contact,
-            //             users.is_registered
-            //         FROM users
-            //         INNER JOIN students ON students.student_id = users.id
-            //         WHERE $whereSQL
-            //         ORDER BY $sortColumn $sortOrder
-            //         LIMIT $limit OFFSET $offset";
-
-            //         $data = $mydb->rawQuery($sql, $params);
-
-            //         $response = [
-            //             "status" => "success",
-            //             "data" => $data,
-            //             "total" => $total,
-            //             "limit" => $limit,
-            //             "page" => $page
-            //         ];
-
-            //     } catch (Exception $e) {
-            //         $response = [
-            //             "status" => "error",
-            //             "message" => "Failed to fetch students: " . $e->getMessage()
-            //         ];
-            //     }
-            //     break;
 
 
             /* ---------------- GET USER INFO ---------------- */
@@ -571,6 +426,11 @@ try {
             case "addTeacher":
 
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+                    
                     $fullname = $_POST['fullname'] ?? '';
                     $department = $_POST['departments'] ?? '';
                     $address = $_POST['address'] ?? '';
@@ -651,6 +511,11 @@ try {
             case "addStudent":
 
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $fullname = $_POST['fullname'] ?? '';
                     $lrn = $_POST['lrn'] ?? '';
                     $address = $_POST['address'] ?? '';
@@ -746,6 +611,11 @@ try {
             /* ---------------- UPDATE TEACHER ---------------- */
             case "update_teacher":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $userId = $_SESSION["user_id"];
 
                     // Check for duplicate email
@@ -820,6 +690,11 @@ try {
             /* ---------------- UPDATE STUDENT ---------------- */
             case "update_student":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $userId = $_SESSION["user_id"];
 
                     // Check email duplication
@@ -898,6 +773,11 @@ try {
             /* ---------------- DELETE USER ---------------- */
             case "deleteUser":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $userId = $_POST['user_id'] ?? 0;
                     $role = $_POST['role'] ?? '';
 
@@ -927,6 +807,10 @@ try {
             /* ---------------- UPDATE QUARTERS ---------------- */
             case "update_quarters":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
 
                     // Build array of 4 quarters from POST
                     $quarters = [];
@@ -980,6 +864,11 @@ try {
             /* ---------------- UPDATE ADMIN PASSWORD ---------------- */
             case "update_admin_password":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $userId = $_SESSION["user_id"];
                     $newPass = password_hash($_POST["password"], PASSWORD_DEFAULT);
 
@@ -1062,7 +951,12 @@ try {
             /* ---------------- UPDATE CLASSROOM ---------------- */
             case "update_classroom":
 
+                
                 try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $class_id = $_POST["class_id"] ?? null;
 
                     if (!$class_id) {
@@ -1093,11 +987,16 @@ try {
                 break;
 
 
-
+                
             /* ---------------- GET CLASSROOMS ---------------- */
             case "get_classrooms":
 
+                
                 try {
+                    if (!isset($_SESSION['user_id']) || ($_SESSION['user_role'] !== 'teacher' && $_SESSION['user_role'] !== 'student')) {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     if (!isset($_SESSION['user_id'])) {
                         $response = ["success" => false, "message" => "Not logged in"];
                         break;
@@ -1199,7 +1098,12 @@ try {
             /* ---------------- GET SINGLE CLASSROOM ---------------- */
             case "get_single_classroom":
 
+                
                 try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $id = $_POST["id"] ?? null;
 
                     if (!$id) {
@@ -1226,7 +1130,12 @@ try {
             /* ---------------- ARCHIVING ---------------- */
             case "archive_classroom":
 
+                
                 try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $class_id = $_POST["class_id"];
 
                     $sql = "UPDATE classrooms SET status = 'archived' WHERE id = ?";
@@ -1251,6 +1160,10 @@ try {
             case "unarchive_classroom":
 
                 try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $class_id = $_POST["class_id"];
 
                     $sql = "UPDATE classrooms SET status = 'active' WHERE id = ?";
@@ -1275,6 +1188,10 @@ try {
             case "delete_classroom":
 
                 try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $class_id = $_POST["class_id"];
 
                     // Use the myDB delete function
@@ -1298,6 +1215,10 @@ try {
                 /* ---------------- GET CLASS MEMBERS ---------------- */
             case "getClassMembers":
                 try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $class_id = $_POST['class_id'];
                     $search   = $_POST['search'] ?? '';
 
@@ -1347,133 +1268,15 @@ try {
                 }
                 break;
 
-                // case "getClassMembers":
-                //     try {
-                //         $class_id = $_POST['class_id'];
-                //         $search   = $_POST['search'] ?? '';
-                //         $page     = intval($_POST['page'] ?? 1);
-                //         $limit    = 10;
-                //         $offset   = ($page - 1) * $limit;
-
-                //         $attendanceDate = $_POST['attendance_date'] ?? null;
-                //         $quarterName    = $_POST['quarter'] ?? null;
-
-                //         $searchTerm = "%$search%";
-
-                //         // ---------------- BASE WHERE ----------------
-                //         $where = "
-                //             cm.class_id = ?
-                //             AND (
-                //                 u.name LIKE ?
-                //                 OR s.lrn LIKE ?
-                //                 OR u.email LIKE ?
-                //                 OR u.gender LIKE ?
-                //                 OR u.address LIKE ?
-                //                 OR s.guardian_email LIKE ?
-                //                 OR s.guardian_contact LIKE ?
-                //                 OR cm.status LIKE ?
-                //             )
-                //         ";
-
-                //         $whereParams = [
-                //             $class_id,
-                //             $searchTerm,
-                //             $searchTerm,
-                //             $searchTerm,
-                //             $searchTerm,
-                //             $searchTerm,
-                //             $searchTerm,
-                //             $searchTerm,
-                //             $searchTerm
-                //         ];
-
-                //         // ---------------- ATTENDANCE JOIN ----------------
-                //         $attendanceJoin   = "";
-                //         $attendanceParams = [];
-
-                //         if (!empty($attendanceDate)) {
-                //             $attendanceJoin = "AND a.date = ?";
-                //             $attendanceParams[] = $attendanceDate;
-
-                //         } elseif (!empty($quarterName)) {
-                //             $quarter = $mydb->rawQuery(
-                //                 "SELECT start_date, end_date FROM quarter WHERE quarter_name = ? LIMIT 1",
-                //                 [$quarterName]
-                //             );
-
-                //             if (!empty($quarter)) {
-                //                 $attendanceJoin = "AND a.date BETWEEN ? AND ?";
-                //                 $attendanceParams[] = $quarter[0]['start_date'];
-                //                 $attendanceParams[] = $quarter[0]['end_date'];
-                //             }
-                //         }
-
-                //         // ---------------- COUNT ----------------
-                //         $countSql = "
-                //             SELECT COUNT(*) AS total
-                //             FROM class_members cm
-                //             INNER JOIN students s ON s.student_id = cm.student_id
-                //             INNER JOIN users u ON u.id = s.student_id
-                //             WHERE $where
-                //         ";
-
-                //         $total = $mydb->rawQuery($countSql, $whereParams)[0]['total'];
-
-                //         // ---------------- MAIN QUERY ----------------
-                //         $sql = "
-                //             SELECT
-                //                 u.id AS student_id,
-                //                 u.name,
-                //                 u.profile_photo,
-                //                 s.lrn,
-                //                 u.age,
-                //                 u.gender,
-                //                 u.birthdate,
-                //                 u.address,
-                //                 u.email,
-                //                 s.guardian_email,
-                //                 s.guardian_contact,
-                //                 cm.status AS class_status,
-                //                 a.status AS attendance_status,
-                //                 a.date   AS attendance_date
-                //             FROM class_members cm
-                //             INNER JOIN students s ON s.student_id = cm.student_id
-                //             INNER JOIN users u ON u.id = s.student_id
-                //             LEFT JOIN attendance a
-                //                 ON a.student_id = cm.student_id
-                //                 AND a.class_id = cm.class_id
-                //                 $attendanceJoin
-                //             WHERE $where
-                //             ORDER BY u.name ASC
-                //             LIMIT $limit OFFSET $offset
-                //         ";
-
-                //         // ATTENDANCE PARAMS FIRST
-                //     $finalParams = array_merge($whereParams, $attendanceParams);
-                //     $data = $mydb->rawQuery($sql, $finalParams);
-
-                //         $response = [
-                //             "status" => "success",
-                //             "data"   => $data,
-                //             "total"  => $total,
-                //             "limit"  => $limit,
-                //             "page"   => $page
-                //         ];
-
-                //     } catch (Exception $e) {
-                //         $response = [
-                //             "status"  => "error",
-                //             "message" => $e->getMessage()
-                //         ];
-                //     }
-                //     break;
-
-
-
 
             /* ---------------- GET CLASS MEMBERS ATTENDANCE ---------------- */
             case "getClassMembersAttendance":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $class_id = $_POST['class_id'];
                     $date     = $_POST['attendance_date'];
                     $search   = $_POST['search'] ?? '';
@@ -1536,6 +1339,10 @@ try {
             /* ---------------- GET ATTENDANCE REPORT ---------------- */
             case "getAttendanceReport":
                 try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $class_id = $_POST['class_id'];
                     $quarter  = $_POST['quarter'] ?? null;
                     $search   = trim($_POST['search'] ?? '');
@@ -1622,96 +1429,14 @@ try {
                 break;
 
 
-
-            // /* ---------------- GET CLASS MEMBERS ---------------- */
-            // case "getClassMembers":
-            //     try {
-            //         $class_id = $_POST['class_id'];
-            //         $search = $_POST['search'] ?? '';
-            //         $page = intval($_POST['page'] ?? 1);
-            //         $limit = 10;
-            //         $offset = ($page - 1) * $limit;
-
-            //         $searchTerm = "%$search%";
-
-            //         $where = "
-            //             cm.class_id = ?
-            //             AND (
-            //                 u.name LIKE ?
-            //                 OR s.lrn LIKE ?
-            //                 OR u.email LIKE ?
-            //                 OR u.gender LIKE ?
-            //                 OR u.address LIKE ?
-            //                 OR s.guardian_email LIKE ?
-            //                 OR s.guardian_contact LIKE ?
-            //                 OR cm.status LIKE ?
-            //             )
-            //         ";
-
-            //         $params = [
-            //             $class_id,
-            //             $searchTerm,
-            //             $searchTerm,
-            //             $searchTerm,
-            //             $searchTerm,
-            //             $searchTerm,
-            //             $searchTerm,
-            //             $searchTerm,
-            //             $searchTerm
-            //         ];
-
-            //         $countSql = "
-            //             SELECT COUNT(*) AS total
-            //             FROM class_members cm
-            //             INNER JOIN students s ON s.student_id = cm.student_id
-            //             INNER JOIN users u ON u.id = s.student_id
-            //             WHERE $where
-            //         ";
-
-            //         $total = $mydb->rawQuery($countSql, $params)[0]['total'];
-
-            //         $sql = "
-            //             SELECT
-            //                 u.id AS student_id,
-            //                 u.name,
-            //                 u.profile_photo,
-            //                 s.lrn,
-            //                 u.age,
-            //                 u.gender,
-            //                 u.birthdate,
-            //                 u.address,
-            //                 u.email,
-            //                 s.guardian_email,
-            //                 s.guardian_contact,
-            //                 cm.status
-            //             FROM class_members cm
-            //             INNER JOIN students s ON s.student_id = cm.student_id
-            //             INNER JOIN users u ON u.id = s.student_id
-            //             WHERE $where
-            //             ORDER BY u.name ASC
-            //             LIMIT $limit OFFSET $offset
-            //         ";
-
-            //         $data = $mydb->rawQuery($sql, $params);
-
-            //         $response = [
-            //             "status" => "success",
-            //             "data" => $data,
-            //             "total" => $total,
-            //             "limit" => $limit,
-            //             "page" => $page
-            //         ];
-            //     } catch (Exception $e) {
-            //         $response = ["status" => "error", "message" => $e->getMessage()];
-            //     }
-            //     break;
-
-
-
-
             /* ---------------- GET INVITABLE STUDENTS ---------------- */
             case "getInvitableStudents":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $class_id = $_POST['class_id'];
                     $search = $_POST['search'] ?? '';
                     $page = intval($_POST['page'] ?? 1);
@@ -1773,6 +1498,11 @@ try {
             /* ---------------- INVITE STUDENT TO CLASS ---------------- */
             case "inviteStudentToClass":
                 try {
+
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+
                     $class_id = $_POST['class_id'];
                     $student_id = $_POST['student_id'];
 
@@ -1795,6 +1525,7 @@ try {
             /* ---------------- REMOVE STUDENT FROM CLASS ---------------- */
             case "removeStudentFromClass":
                 try {
+
                     // Security check
                     if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== "teacher") {
                         throw new Exception("Unauthorized access");
@@ -1842,6 +1573,10 @@ try {
             /* ---------------- SAVE ATTENDANCE ---------------- */
             case "saveAttendance":
                 try {
+                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
+                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    }
+                    
                     $class_id   = $_POST['class_id'];
                     $student_id = $_POST['student_id'];
                     $date       = $_POST['date'];
@@ -1939,7 +1674,6 @@ try {
                         /* class_id LAST */
                         $params[] = $class_id;
 
-                        /* ✅ SAME QUERY AS TABLE */
                         $sql = "
                             SELECT
                                 u.name,
@@ -1965,7 +1699,6 @@ try {
 
                         $rows = $mydb->rawQuery($sql, $params);
 
-                        /* 🔥 FORCE CSV DOWNLOAD */
                         header("Content-Type: text/csv");
                         header("Content-Disposition: attachment; filename=attendance_report.csv");
                         header("Pragma: no-cache");

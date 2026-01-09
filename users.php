@@ -374,7 +374,6 @@ $(document).ready(function() {
                 `;
             } else {
                 actionButtons = `
-                    <button class="btn-primary edit-user" data-id="${u.user_id}">Edit</button>
                     <button class="btn-delete delete-user" data-id="${u.user_id}">Delete</button>
                 `;
             }

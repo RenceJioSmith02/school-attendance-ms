@@ -9,12 +9,14 @@
 
     <!-- Desktop Links -->
     <div class="links">
-        <a class="link" href="users.php">Users</a>
-        &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-        <a class="link" href="classrooms.php">Classrooms</a>
-        &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-        <a class="link" href="report.php">Report</a>
-        &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+        <?php if(isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {?>
+            <a class="link" href="users.php">Users</a>
+            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+        <?php } ?>
+        <?php if(isset($_SESSION['user_role']) && ($_SESSION['user_role'] === 'teacher' || $_SESSION['user_role'] === 'student')) {?>
+            <a class="link" href="classrooms.php">Classrooms</a>
+            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+        <?php } ?>
         <a class="link" href="profile.php"><?php echo (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')
             ? 'Settings'
             : 'Profile'; ?></a>
@@ -35,10 +37,13 @@
 <!-- Mobile Sidebar -->
 <div class="sidebar" id="mobileSidebar">
 
-    <a class="link" href="users.php">Users</a>
-    <a class="link" href="classrooms.php">Classrooms</a>
-    <a class="link" href="report.php">Report</a>
-    <a class="link" href="profile.php"><?php echo (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')
+    <?php if(isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {?>
+        <a class="link" href="users.php">Users</a>
+    <?php } ?>
+    <?php if(isset($_SESSION['user_role']) && ($_SESSION['user_role'] === 'teacher' || $_SESSION['user_role'] === 'student')) {?>
+        <a class="link" href="classrooms.php">Classrooms</a>
+    <?php } ?>
+        <a class="link" href="profile.php"><?php echo (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin')
         ? 'Settings'
         : 'Profile'; ?></a>
 

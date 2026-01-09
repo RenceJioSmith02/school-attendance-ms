@@ -30,7 +30,6 @@
 
             <!-- Main Content -->
             <div class="content dashboard">
-                <div class="top-controls flex jus-between al-center pt10 pb10">
 
                 <div class="flex al-center jus-around gap-50 attendance-summary" style="order: 2;">
                     <div class="box present">
@@ -51,7 +50,7 @@
                     </div>
                 </div>
 
-
+                <div class="top-controls flex jus-between al-center pt10 pb10">
                     <div class="flex al-center jus center gap-10">
                         <input type="date" name="attendanceDate" id="attendanceDate">
                     </div>
