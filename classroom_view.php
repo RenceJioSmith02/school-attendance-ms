@@ -286,19 +286,19 @@ include_once 'partials/session.php'
                                 Remove
                             </button>
                             <div class="attendance-buttons">
-                                <button class="btn-primary present-student"
+                                <button class="btn-primary present-student" style="background: #2ecc71; color: #fff;"
                                         data-id="${s.student_id}">
                                     P
                                 </button>
-                                <button class="btn-primary late-student"
+                                <button class="btn-primary late-student" style="background: #f39c12; color: #fff;"
                                         data-id="${s.student_id}">
                                     L
                                 </button>
-                                <button class="btn-primary absent-student"
+                                <button class="btn-primary absent-student" style="background: #e74c3c; color: #fff;"
                                         data-id="${s.student_id}">
                                     A
                                 </button>
-                                <button class="btn-primary excuse-student"
+                                <button class="btn-primary excuse-student" style="background: #555; color: #fff;"
                                         data-id="${s.student_id}">
                                     E
                                 </button>

@@ -427,9 +427,9 @@ try {
 
                 try {
 
-                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
-                    }
+                    // if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                    //     exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    // }
                     
                     $fullname = $_POST['fullname'] ?? '';
                     $department = $_POST['departments'] ?? '';
@@ -512,9 +512,9 @@ try {
 
                 try {
 
-                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
-                    }
+                    // if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                    //     exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    // }
 
                     $fullname = $_POST['fullname'] ?? '';
                     $lrn = $_POST['lrn'] ?? '';
@@ -1824,14 +1824,14 @@ try {
 
                     // ========== DAILY ATTENDANCE ==========
                     $attendanceSql = "
-            SELECT 
-                date,
-                status
-            FROM attendance
-            WHERE class_id = ?
-              AND student_id = ?
-              AND date BETWEEN ? AND ?
-        ";
+                        SELECT 
+                            date,
+                            status
+                        FROM attendance
+                        WHERE class_id = ?
+                        AND student_id = ?
+                        AND date BETWEEN ? AND ?
+                    ";
 
                     $attendanceData = $mydb->rawQuery($attendanceSql, [
                         $class_id,
