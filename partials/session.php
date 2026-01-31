@@ -9,10 +9,6 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Include DB
-// require_once "../db/db.php";
-// $mydb = new myDB();
-
 // Verify the session user still exists
 $user = $mydb->select_one("users", "*", ["id" => $_SESSION['user_id']]);
 

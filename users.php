@@ -205,7 +205,6 @@ include_once 'partials/session.php'
                     <img src="./assets/images/system_image/svg/search-icon.svg" class="search-icon" />
                 </div>
                 <div class="flex al-center jus center gap-10">
-                    <button class="btn-primary" style="max-width: 150px;" id="reload">Reload</button>
                     <button class="btn-primary" style="max-width: 150px;" id="showAddTeacherForm">+ Add Teacher</button>
                     <button class="btn-primary" style="max-width: 150px; display: none;" id="showAddStudentForm">+ Add
                         Student</button>
@@ -631,9 +630,9 @@ $(document).ready(function() {
 
 
     // --------------------- RELOAD BUTTON ---------------------
-    $("#reload").on("click", function() {
-        location.reload();
-    });
+    // $("#reload").on("click", function() {
+    //     location.reload();
+    // });
 
 });
 </script>

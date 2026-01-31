@@ -122,8 +122,8 @@ include_once 'partials/session.php'
                 <div class="flex al-center jus center gap-10">
 
                     <select id="filterShowbuttons" class="btn-primary custom-filter" style="max-width: 150px;">
-                        <option class="text-left" value="attendance">Attendance</option>
                         <option class="text-left" value="user_management">User Management</option>
+                        <option class="text-left" value="attendance">Attendance</option>
                         <option class="text-left" value="report">Report</option>
                     </select>
 
@@ -196,7 +196,7 @@ include_once 'partials/session.php'
             // --------------------- STATE ---------------------
             let classId = new URLSearchParams(window.location.search).get("id");
             let currentPage = 1;
-            let currentMode = "attendance"; // default
+            let currentMode = "user_management"; // default
 
             // --------------------- INIT ---------------------
             loadClassMembers();
@@ -271,7 +271,7 @@ include_once 'partials/session.php'
                         <td>${s.email}</td>
                         <td>${s.guardian_email}</td>
                         <td>${s.guardian_contact}</td>
-                        <td>
+                        <td class="badge">
                             ${s.attendance_status
                             ? `<span class="badge ${s.attendance_status}" 
                                     title="${s.reason ?? ''}">
@@ -490,6 +490,7 @@ include_once 'partials/session.php'
                     $("#downloadReport").addClass("hidden");
                     $(".remove-student").addClass("hidden");
                     $(".attendance-buttons").removeClass("hidden");
+                    $(".attendance-status").removeClass("hidden");
 
                 }
                 else if (currentMode === "report") {
@@ -529,7 +530,7 @@ include_once 'partials/session.php'
                             <th>Email</th>
                             <th>Guardian Email</th>
                             <th>Guardian Contact</th>
-                            <th>Status</th>
+                            <th class="attendance-status" >Status</th>
                             <th>Action</th>
                         </tr>
                     `);
@@ -540,6 +541,9 @@ include_once 'partials/session.php'
                     $("#downloadReport").addClass("hidden");
                     $(".remove-student").removeClass("hidden");
                     $(".attendance-buttons").addClass("hidden");
+                    $(".attendance-status").addClass("hidden");
+                    $(".badge").addClass("hidden");
+
                 }
             }
 
@@ -548,7 +552,7 @@ include_once 'partials/session.php'
                 currentMode = $(this).val();
                 currentPage = 1;
                 applyModeUI();
-                loadClassMembers(); // ✅ ADD THIS
+                loadClassMembers();
             });
 
 
@@ -623,62 +627,35 @@ include_once 'partials/session.php'
 
             let classId = new URLSearchParams(window.location.search).get("id");
 
-$("#downloadReport").on("click", function () {
+            $("#downloadReport").on("click", function () {
 
-    const classId = new URLSearchParams(window.location.search).get("id");
+                const classId = new URLSearchParams(window.location.search).get("id");
 
-    if (!classId) {
-        Swal.fire("Error", "Invalid class ID", "error");
-        return;
-    }
+                if (!classId) {
+                    Swal.fire("Error", "Invalid class ID", "error");
+                    return;
+                }
 
-    const form = $("<form>", {
-        method: "POST",
-        action: "db/request.php"
-    });
+                const form = $("<form>", {
+                    method: "POST",
+                    action: "db/request.php"
+                });
 
-    form.append($("<input>", { name: "action", value: "downloadAttendanceReport", type: "hidden" }));
-    form.append($("<input>", { name: "class_id", value: classId, type: "hidden" }));
-    form.append($("<input>", { name: "quarter", value: $("#filterQuarter").val(), type: "hidden" }));
-    form.append($("<input>", { name: "search", value: $("#classMember_searchInput").val(), type: "hidden" }));
+                form.append($("<input>", { name: "action", value: "downloadAttendanceReport", type: "hidden" }));
+                form.append($("<input>", { name: "class_id", value: classId, type: "hidden" }));
+                form.append($("<input>", { name: "quarter", value: $("#filterQuarter").val(), type: "hidden" }));
+                form.append($("<input>", { name: "search", value: $("#classMember_searchInput").val(), type: "hidden" }));
 
-    $("body").append(form);
-    form.submit();
-    form.remove();
-});
+                $("body").append(form);
+                form.submit();
+                form.remove();
+            });
 
 
 
         });
 
 
-
-
-        document.addEventListener("click", function (e) {
-
-            // Check if click happened inside ANY table
-            const cell = e.target.closest("td, th");
-            if (!cell) return;
-
-            const table = cell.closest("table");
-            if (!table) return;
-
-            // Ignore action column (last column)
-            const row = cell.parentNode;
-            if (!row || !row.cells) return;
-
-            const lastIndex = row.cells.length - 1;
-            if (cell.cellIndex === lastIndex) return;
-
-            // Collapse previously expanded cell (global)
-            const expanded = document.querySelector("td.expanded, th.expanded");
-            if (expanded && expanded !== cell) {
-                expanded.classList.remove("expanded");
-            }
-
-            // Toggle expansion
-            cell.classList.toggle("expanded");
-        });
 
     </script>
 

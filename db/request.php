@@ -24,6 +24,50 @@ $response = ["status" => "error", "message" => "Unknown error"];
 //     exit(json_encode(["success" => false, "message" => "Unauthorized"]));
 // }
 
+
+function sendAttendanceEmail($guardianEmail, $studentName, $date, $status, $reason)
+{
+    if (!$guardianEmail)
+        return false;
+
+    $mail = new PHPMailer(true);
+
+    try {
+        // SMTP
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'bananakunyelo1@gmail.com';
+        $mail->Password = 'ypumneuyvimcneyf';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        $mail->setFrom('bananakunyelo1@gmail.com', 'School Attendance System');
+        $mail->addAddress($guardianEmail);
+
+        $mail->isHTML(true);
+        $mail->Subject = "Attendance Notice";
+
+        $mail->Body = "
+            <p>Good day!</p>
+
+            <p>This is to inform you that <strong>{$studentName}</strong> was marked
+            <strong>" . strtoupper($status) . "</strong> on <strong>{$date}</strong>.</p>
+
+            <p><strong>Reason:</strong><br>" . nl2br(htmlspecialchars($reason)) . "</p>
+
+            <p>Thank you,<br>School Administration</p>
+        ";
+
+        $mail->send();
+        return true;
+
+    } catch (Exception $e) {
+        return $mail->ErrorInfo;
+    }
+}
+
+
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
@@ -612,9 +656,9 @@ try {
             case "update_teacher":
                 try {
 
-                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-                        exit(json_encode(["success" => false, "message" => "Unauthorized"]));
-                    }
+                    // if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                    //     exit(json_encode(["success" => false, "message" => "Unauthorized"]));
+                    // }
 
                     $userId = $_SESSION["user_id"];
 
@@ -691,7 +735,7 @@ try {
             case "update_student":
                 try {
 
-                    if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
+                    if (!isset($_SESSION['user_id'])) {
                         exit(json_encode(["success" => false, "message" => "Unauthorized"]));
                     }
 
@@ -1576,41 +1620,67 @@ try {
                     if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'teacher') {
                         exit(json_encode(["success" => false, "message" => "Unauthorized"]));
                     }
-                    
-                    $class_id   = $_POST['class_id'];
-                    $student_id = $_POST['student_id'];
-                    $date       = $_POST['date'];
-                    $status     = $_POST['status'];
-                    $reason     = $_POST['reason'] ?? null;
+
+                    $class_id = $_POST['class_id'] ?? null;
+                    $student_id = $_POST['student_id'] ?? null;
+                    $date = $_POST['date'] ?? null;
+                    $status = $_POST['status'] ?? null;
+                    $reason = $_POST['reason'] ?? null;
+
+                    if (!$class_id || !$student_id || !$date || !$status) {
+                        throw new Exception("Incomplete data");
+                    }
 
                     // Check if attendance exists
                     $existing = $mydb->rawQuery(
                         "SELECT id FROM attendance 
-                        WHERE class_id = ? AND student_id = ? AND date = ?",
+             WHERE class_id = ? AND student_id = ? AND date = ?",
                         [$class_id, $student_id, $date]
                     );
 
                     if (!empty($existing)) {
-                        // Update
                         $mydb->rawQuery(
                             "UPDATE attendance 
-                            SET status = ?, reason = ?
-                            WHERE id = ?",
+                 SET status = ?, reason = ?
+                 WHERE id = ?",
                             [$status, $reason, $existing[0]['id']]
                         );
                     } else {
-                        // Insert
                         $mydb->rawQuery(
-                            "INSERT INTO attendance 
-                                (class_id, student_id, date, status, reason)
-                            VALUES (?, ?, ?, ?, ?)",
+                            "INSERT INTO attendance (class_id, student_id, date, status, reason)
+                 VALUES (?, ?, ?, ?, ?)",
                             [$class_id, $student_id, $date, $status, $reason]
                         );
                     }
 
+                    /* ================= EMAIL TRIGGER ================= */
+
+                    if (in_array($status, ['absent', 'excuse'])) {
+
+                        $info = $mydb->rawQuery(
+                            "SELECT 
+                    u.name AS student_name,
+                    s.guardian_email
+                 FROM students s
+                 JOIN users u ON u.id = s.student_id
+                 WHERE s.student_id = ?",
+                            [$student_id]
+                        );
+
+                        if (!empty($info)) {
+                            sendAttendanceEmail(
+                                $info[0]['guardian_email'],
+                                $info[0]['student_name'],
+                                $date,
+                                $status,
+                                $reason ?? 'No reason provided'
+                            );
+                        }
+                    }
+
                     $response = [
                         "status" => "success",
-                        "message" => "Attendance saved"
+                        "message" => "Attendance saved successfully"
                     ];
 
                 } catch (Exception $e) {
@@ -1620,7 +1690,6 @@ try {
                     ];
                 }
                 break;
-
 
             
                 /* ---------------- DOWNLOAD ATTENDANCE REPORT ---------------- */

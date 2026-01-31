@@ -128,6 +128,7 @@ include_once 'partials/session.php'
                     <input type="text" id="searchInput" placeholder="Search...">
                     <img src="./assets/images/system_image/svg/search-icon.svg" class="search-icon" />
                 </div>
+                <?php if(isset($_SESSION['user_role']) && ($_SESSION['user_role'] === 'teacher')) {?>
                 <div class="flex al-center jus center gap-10">
                     <button class="btn-primary" style="max-width: 150px;" id="showAddClassForm">+ Add Class</button>
                     <select id="filterStatus" class="btn-primary custom-filter" style="max-width: 150px;">
@@ -135,6 +136,7 @@ include_once 'partials/session.php'
                         <option class="text-left" value="archived">Archived</option>
                     </select>
                 </div>
+                <?php } ?>
             </div>
 
 
