@@ -60,34 +60,6 @@ class myDB
         return $this->conn->insert_id;
     }
 
-    // UPDATE DATA 
-    // public function update($table, $data, $where)
-    // {
-    //     try {
-    //         $set = [];
-    //         foreach ($data as $key => $value) {
-    //             $set[] = "$key = ?";
-    //         }
-
-    //         $conditions = [];
-    //         foreach ($where as $key => $value) {
-    //             $conditions[] = "$key = ?";
-    //         }
-
-    //         $sql = "UPDATE $table SET " . implode(", ", $set) . " WHERE " . implode(" AND ", $conditions);
-    //         $stmt = $this->conn->prepare($sql);
-    //         if (!$stmt) {
-    //             throw new Exception("Prepare failed: " . $this->conn->error);
-    //         }
-
-    //         $types = str_repeat("s", count($data) + count($where));
-    //         $stmt->bind_param($types, ...array_merge(array_values($data), array_values($where)));
-    //         $stmt->execute();
-    //         $stmt->close();
-    //     } catch (Exception $e) {
-    //         die("Error while updating data: " . $e->getMessage());
-    //     }
-    // }
 
     public function update($table, $data, $where)
     {
@@ -112,10 +84,10 @@ class myDB
             $stmt->bind_param($types, ...array_merge(array_values($data), array_values($where)));
             $stmt->execute();
 
-            $affectedRows = $stmt->affected_rows; // ✅ get affected rows
+            $affectedRows = $stmt->affected_rows; 
 
             $stmt->close();
-            return $affectedRows; // ✅ return it
+            return $affectedRows; 
         } catch (Exception $e) {
             die("Error while updating data: " . $e->getMessage());
         }
