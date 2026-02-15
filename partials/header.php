@@ -2,10 +2,10 @@
 <header class="flex jus-between al-center">
 
     <!-- Logo -->
-    <a href="admin.php" class="logo-container-header flex jus-center al-center" style="gap: 10px;">
+    <div class="logo-container-header flex jus-center al-center" style="gap: 10px;">
         <img src="./assets/images/system_image/school-logo.png" width="40" alt="Logo">
         <h1>JOLNHS</h1>
-    </a>
+    </div>
 
     <!-- Desktop Links -->
     <div class="links">

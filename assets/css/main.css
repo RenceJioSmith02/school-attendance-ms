@@ -669,7 +669,6 @@ tbody tr:hover td {
   color: var(--gray-dark);
 }
 
-/* Expanded cell */
 td.expanded,
 th.expanded {
   white-space: normal !important;

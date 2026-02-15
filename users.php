@@ -59,12 +59,11 @@ include_once 'partials/session.php'
                             <option value="Mathematics">Mathematics</option>
                             <option value="Science">Science</option>
                             <option value="English">English</option>
-                            <option value="History">History</option>
-                            <option value="Physical Education">Physical Education</option>
-                            <option value="Arts">Arts</option>
-                            <option value="Music">Music</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Administration">Administration</option>
+                            <option value="Filipino">Filipino</option>
+                            <option value="Araling Panlipunan">Araling Panlipunan</option>
+                            <option value="ESP">ESP</option>
+                            <option value="TLE">TLE</option>
+                            <option value="Mapeh ">Mapeh </option>
                         </select>
                     </div>
                     <div class="input-group">
@@ -220,7 +219,10 @@ include_once 'partials/session.php'
                         <option class="text-left" value="Science">Science</option>
                         <option class="text-left" value="English">English</option>
                         <option class="text-left" value="Filipino">Filipino</option>
-                        <option class="text-left" value="Mapeh">Mapeh</option>
+                        <option class="text-left" value="Araling Panlipunan">Araling Panlipunan</option>
+                        <option class="text-left" value="ESP">ESP</option>
+                        <option class="text-left" value="TLE">TLE</option>
+                        <option class="text-left" value="Mapeh ">Mapeh </option>
                     </select>
 
                     <select id="filterRegistered" class="btn-primary custom-filter" style="max-width: 150px;">
